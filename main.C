@@ -1999,7 +1999,8 @@ void find_onepair_f2_table_rotation_pgge(Complex_Table& f2_model_table, const Pi
   // prop
   Coordinate x_z = relative_coordinate(Coordinate(0.,0.,0.,-tsep), total_site);
   Coordinate zp_y = relative_coordinate(Coordinate(0.,0.,0.,-tsep), total_site);
-  Complex prop = pion_prop(y_large, Coor_0, pion) / (pion_prop(x_z, Coor_0, pion) * pion_prop(zp_y, Coor_0, pion));
+  // Complex prop = pion_prop(y_large, Coor_0, pion) / (pion_prop(x_z, Coor_0, pion) * pion_prop(zp_y, Coor_0, pion));
+  Complex prop = pion_prop(y_large, Coor_0, pion) / (1. / (2. * pion) * exp(-pion * tsep) * 1. / (2. * pion) * exp(-pion * tsep));
 
   e_xbbm_table = (prop / onepair.dist) * e_xbbm_table;
   // show one pair e_xbbm_table
@@ -2525,7 +2526,7 @@ std::vector<Complex> compute_wall_wall_correlation_function(const std::string& w
 
 void test()
 {
-#if 1
+#if 0
   init_muon_line();
   double MUON = 0.1056583745 / AINV;
   double PION = 0.13975 / AINV;
@@ -2559,9 +2560,9 @@ void test()
   exit(0);
 #endif
 
-#if 0
+#if 1
   const std::string WALL_SRC_PATH = "/home/ljin/application/Public/Qlat-CPS-cc/jobs/24D/wall-src/results/results=1030/huge-data/wall_src_propagator";
-  const std::string GAUGE_TRANSFORM_PATH = "/home/ljin/application/Public/Qlat-CPS-cc/jobs/24D/wall-src/results/results=1030/huge-data/gauge-transform";
+  const std::string GAUGE_TRANSFORM_PATH = "/home/ljin/application/Public/Qlat-CPS-cc/jobs/25D/wall-src/results/results=1030/huge-data/gauge-transform";
   const std::string POINT_SRC_PATH = "/home/ljin/application/Public/Muon-GM2-cc/jobs/24D/discon-1/results/prop-hvp\ \;\ results\=1030/huge-data/prop-point-src";
   const int T_SEP = 20;
   const std::string FIELD_OUT_PATH = "PionGGElemField/24D";
