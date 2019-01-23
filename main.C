@@ -7,6 +7,7 @@
 #include <math.h>
 #include <dirent.h>
 #include "muon-line.h"
+
 #include <map>
 #include <vector>
 
@@ -642,6 +643,11 @@ struct PionGG
   Coordinate mom;
   std::vector<PionGGElem> table;
 };
+
+Complex two_prop_contraction(const WilsonMatrix& wm_from_1_to_2, const WilsonMatrix& wm_from_2_to_1)
+{
+  return matrix_trace((ii * gamma5) * wm_from_2_to_1 * (ii * gamma5) * wm_from_1_to_2);
+}
 
 // check
 void three_prop_contraction(PionGGElem& pgge, const WilsonMatrix& wm_21, const WilsonMatrix& wm_32, const WilsonMatrix& wm_13)
@@ -2326,7 +2332,7 @@ void pair_wall_src_prop_and_point_src_prop(const int t_sep, const std::string& w
       int t_point = point_src_coor[3];
       int t_wall = mod(t_point + i * t_sep, total_site[3]);
       const std::string wall_src_t_path = wall_src_path + "/t=" + ssprintf("%d", t_wall);
-      displayln_info("wall_src_prop path: " + wall_src_t_path);
+      displayln_info("wall_src_t_prop path: " + wall_src_t_path);
 
       // gauge inv and shift
       Propagator4d point_src_prop_shift;
@@ -2389,6 +2395,132 @@ void read_pionggelemfield_and_avg(PionGGElemField& pgge_field_avg, const std::st
   displayln_info("test::show_pgge_avg");
   displayln_info(show_pgge(pgge_field_avg.get_elem(0)));
   displayln_info(show_pgge(pgge_field_avg.get_elem(10)));
+}
+
+void sum_sink_over_space_from_prop(std::vector<WilsonMatrix>, const Propagator4d& prop)
+{
+  const Geometry& geo = prop.geo;
+  const int total_t = geo.total_site()[3];
+  qassert(total_t == wm_t.size());
+  for (int i = 0; i < wm_t.size(); ++i)
+  {
+    set_zero(wm_t[i]);
+  }
+
+  for (long index = 0; index < geo.local_volume(); ++index)
+  {
+    const Coordinate lx = geo.coordinate_from_index(index);
+    const Coordinate x = geo.coordinate_g_from_l(lx);
+    const int t = x[3];
+
+    wm_t[t] += prop.get_elem(lx);
+  }
+
+  for (int i = 0; i < wm_t.size(); ++i)
+  {
+    glb_sum_double(wm_t[i]);
+  }
+}
+
+void sum_src_over_space_from_prop(std::vector<WilsonMatrix> wm_t, const Propagator4d& prop)
+{
+  const Geometry& geo = prop.geo;
+  const int total_t = geo.total_site()[3];
+  qassert(total_t == wm_t.size());
+  for (int i = 0; i < wm_t.size(); ++i)
+  {
+    set_zero(wm_t[i]);
+  }
+
+  for (long index = 0; index < geo.local_volume(); ++index)
+  {
+    const Coordinate lx = geo.coordinate_from_index(index);
+    const Coordinate x = geo.coordinate_g_from_l(lx);
+    const int t = x[3];
+
+    wm_t[t] += gamma5 * matrix_adjoint(prop.get_elem(lx)) * gamma5;
+  }
+
+  for (int i = 0; i < wm_t.size(); ++i)
+  {
+    glb_sum_double(wm_t[i]);
+  }
+}
+
+#if 0
+void sum_sink_over_space_from_wall_prop(const Propagator4d& wall_src_prop, const GaugeTransform& gt)
+{
+  GaugeTransform gtinv;
+  {
+    GaugeTransform gt;
+    dist_read_field(gt, gauge_transform_path);
+    to_from_big_endian_64(get_data(gt));
+    gt_inverse(gtinv, gt);
+  }
+
+  Propagator4d wall_src_prop_gauge;
+  prop_apply_gauge_transformation(wall_src_prop_gauge, wall_src_prop, gtinv);
+
+  return sum_sink_over_space_from_prop(wall_src_prop_gauge);
+}
+
+std::vector<WilsonMatrix> sum_src_over_space_from_wall_prop(const Propagator4d& wall_src_prop, const GaugeTransform& gt)
+{
+  GaugeTransform gtinv;
+  {
+    GaugeTransform gt;
+    dist_read_field(gt, gauge_transform_path);
+    to_from_big_endian_64(get_data(gt));
+    gt_inverse(gtinv, gt);
+  }
+
+  Propagator4d wall_src_prop_gauge;
+  prop_apply_gauge_transformation(wall_src_prop_gauge, wall_src_prop, gtinv);
+
+  return sum_src_over_space_from_prop(wall_src_prop_gauge);
+}
+#endif
+
+std::vector<Complex> compute_wall_wall_correlation_function(const std::string& wall_src_path, const std::string& gauge_transform_path, const int total_t)
+{
+  TIMER_VERBOSE("compute_wall_wall_correlation_function");
+  // gauge ??
+
+  displayln_info("sum src and sink over space for all wall src props start");
+  std::vector<std::vector<WilsonMatrix>> v_v_wm_sink; //??
+  std::vector<std::vector<WilsonMatrix>> v_v_wm_src; //??
+  for (int t = 0; t < total_t; ++t)
+  {
+    displayln_info("sum src and sink, t=" + ssprintf("%d", t));
+    const std::string wall_src_t_path = wall_src_path + "/t=" + ssprintf("%d", t_wall);
+    std::vector<WilsonMatrix>& v_wm_sink = v_v_wm_sink[t];
+    std::vector<WilsonMatrix>& v_wm_src = v_v_wm_src[t];
+
+    sum_sink_over_space_from_prop(v_wm_sink, wall_src_t_path);
+    sum_src_over_space_from_prop(v_wm_src, wall_src_t_path);
+  }
+  displayln_info("sum src and sink over space for all wall src props end");
+
+  displayln_info("compute wall to wall");
+  std::vector<Complex> wall_wall_corr(total_t / 2);
+  set_zero(wall_wall_corr);
+  for (int tstart = 0; tstart < total_t; ++tstart)
+  {
+    for (int tsep = 0; tsep < total_t / 2; ++tsep)
+    {
+      int t_end = mod(tstart + tsep, total_site[3]);
+      displayln_info(ssprintf("compute wall to wall, tstart=%d, tsep=%d, tend=%d", tstart, tsep, tend));
+      wall_wall_corr[tsep] += two_prop_contraction(v_v_wm_sink[tstart][tend], v_v_wm_sink[tend][tstart]);
+      wall_wall_corr[tsep] += two_prop_contraction(v_v_wm_src[tstart][tend], v_v_wm_src[tend][tstart]);
+    }
+  }
+
+  for (int tsep = 0; tsep < total_t / 2; ++tsep)
+  {
+    wall_wall_corr[tsep] /= total_t;
+  }
+
+  return wall_wall_corr;
 }
 
 void test()
