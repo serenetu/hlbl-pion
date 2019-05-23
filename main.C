@@ -1345,26 +1345,19 @@ void compute_three_point_correlator_from_closest_wall_src_prop(const Coordinate&
 
     int t_wall;
     int t_sep;
-    int diff = smod(x[3] - xp[3], total_site[3]);
+    int diff = smod(xp[3] - x[3], total_site[3]);
 
     // t_wall << t and t'
-    if (diff >= 0)
+    if (diff < 0)
     {
       t_wall = mod(xp[3] - t_min, total_site[3]);
+      t_sep = t_min + abs(diff);
+
     } else {
       t_wall = mod(x[3] - t_min, total_site[3]);
+      t_sep = t_min;
     }
 
-    // this is for t_wall >> t and t'
-    // if (diff >= 0)
-    // {
-      // t_wall = mod(x[3] + t_min, total_site[3]);
-    // } else {
-      // t_wall = mod(xp[3] + t_min, total_site[3]);
-    // }
-    
-    t_sep = abs(smod(t_wall - x[3], total_site[3]));
-    
     const Propagator4d& wall_src_prop = wall_src_list[t_wall];
     WilsonMatrix& wm_from_wall_to_x = wm_from_wall_to_x_t[t_wall];
     WilsonMatrix& wm_from_x_to_wall = wm_from_x_to_wall_t[t_wall];
@@ -1378,12 +1371,12 @@ void compute_three_point_correlator_from_closest_wall_src_prop(const Coordinate&
 
     three_prop_contraction (pgge, wm_from_x_to_wall, wm_from_wall_to_xp, wm_from_xp_to_x);
     three_prop_contraction_(pgge, wm_from_xp_to_wall, wm_from_wall_to_x, wm_from_x_to_xp);
-    pgge /= exp(-pion * t_sep);
+    pgge /= exp(-pion * (double)t_sep);
   }
   return;
 }
 
-void compute_three_point_correlator_ama_from_closest_wall_src_prop(const Coordinate& x, const int t_min, PionGGElemField& three_point_correlator_labeled_xp, const Propagator4d& point_src_prop, const std::vector<Propagator4d>& wall_src_list, const std::vector<Propagator4d>& exact_wall_src_list, const std::vector<int>& exact_wall_t_list, const double pion)
+void compute_three_point_correlator_ama_from_closest_wall_src_prop(const Coordinate& x, const int t_min, PionGGElemField& three_point_correlator_labeled_xp, const Propagator4d& point_src_prop, const std::vector<Propagator4d>& wall_src_list, const std::vector<Propagator4d>& exact_wall_src_list, const std::vector<int>& exact_wall_t_list, const double sloppy_exact_ratio, const double pion)
 // three_point_correlator_labeled_xp(xp)[mu][nu] =
 //   Tr(S(x, wall) * ii * gamma5 * S(wall, xp) * gamma_nu * S(xp, x) * gamma_mu) / exp(-pion * (t_wall - t_x))
 // + Tr(S(xp, wall) * ii * gamma5 * S(wall, x) * gamma_mu * S(x, xp) * gamma_nu) / exp(-pion * (t_wall - t_x))
@@ -1435,7 +1428,7 @@ void compute_three_point_correlator_ama_from_closest_wall_src_prop(const Coordin
     exact_wm_from_x_to_wall = gamma5 * matrix_adjoint(exact_wm_from_wall_to_x) * gamma5;
   }
 
-  double ama_factor = 1.0 * wall_src_list.size() / exact_wall_src_list.size();
+  double ama_factor = sloppy_exact_ratio;
 
 #pragma omp parallel for
   for (long index = 0; index < geo.local_volume(); ++index)
@@ -1445,25 +1438,17 @@ void compute_three_point_correlator_ama_from_closest_wall_src_prop(const Coordin
 
     int t_wall;
     int t_sep;
-    int diff = smod(x[3] - xp[3], total_site[3]);
+    int diff = smod(xp[3] - x[3], total_site[3]);
 
     // t_wall << t and t'
-    if (diff >= 0)
+    if (diff < 0)
     {
       t_wall = mod(xp[3] - t_min, total_site[3]);
+      t_sep = t_min + abs(diff);
     } else {
       t_wall = mod(x[3] - t_min, total_site[3]);
+      t_sep = t_min;
     }
-
-    // t_wall >> t and t'
-    // if (diff >= 0)
-    // {
-      // t_wall = mod(x[3] + t_min, total_site[3]);
-    // } else {
-      // t_wall = mod(xp[3] + t_min, total_site[3]);
-    // }
-
-    t_sep = abs(smod(t_wall - x[3], total_site[3]));
 
     PionGGElem& pgge = three_point_correlator_labeled_xp.get_elem(lxp);
     {
@@ -1503,7 +1488,7 @@ void compute_three_point_correlator_ama_from_closest_wall_src_prop(const Coordin
       }
     }
     pgge += pgge_exact;
-    pgge /= exp(-pion * t_sep);
+    pgge /= exp(-pion * (double)t_sep);
   }
   return;
 }
@@ -1584,7 +1569,7 @@ void compute_point_point_wall_correlator_in_one_traj(const int t_min, const std:
   qtouch_info(field_out_tmin_path + "/checkpoint");
 }
 
-void compute_point_point_wall_correlator_ama_in_one_traj(const int t_min, const std::string& wall_src_path, const std::string& exact_wall_src_path, const std::string& gauge_transform_path, const std::string& point_src_path, const std::string& field_out_traj_path, const double pion, int type_)
+void compute_point_point_wall_correlator_ama_in_one_traj(const int t_min, const std::string& wall_src_path, const std::string& exact_wall_src_path, const std::string& gauge_transform_path, const double sloppy_exact_ratio, const std::string& point_src_path, const std::string& field_out_traj_path, const double pion, int type_)
 {
   TIMER_VERBOSE("compute_point_point_wall_correlator_ama_in_one_traj");
 
@@ -1717,7 +1702,7 @@ void compute_point_point_wall_correlator_ama_in_one_traj(const int t_min, const 
     three_point_correlator_labeled_xp.init(geo);
     set_zero(three_point_correlator_labeled_xp.field);
 
-    compute_three_point_correlator_ama_from_closest_wall_src_prop(point_src_coor, t_min, three_point_correlator_labeled_xp, point_src_prop, wall_src_list, exact_wall_src_list, exact_wall_t_list, pion);
+    compute_three_point_correlator_ama_from_closest_wall_src_prop(point_src_coor, t_min, three_point_correlator_labeled_xp, point_src_prop, wall_src_list, exact_wall_src_list, exact_wall_t_list, sloppy_exact_ratio, pion);
 
     // shift
     PionGGElemField three_point_correlator_labeled_xp_shift;
@@ -2070,6 +2055,20 @@ void compute_three_point_corr_model(PionGGElemField& three_point_correlator_labe
   return;
 }
 
+struct TwoPointWallEnsembleInfo {
+  std::string ENSEMBLE;
+  double PION;
+  std::string precision;
+
+  std::vector<int> traj_list;
+  int T_MIN;
+  std::string FIELD_PATH;
+
+  int num_wall_sloppy;
+  int num_wall_exact;
+  double WALL_SLOPPY_EXACT_RATIO;
+};
+
 void compute_f2_24D_sloppy_all_traj()
 {
   init_muon_line();
@@ -2311,8 +2310,6 @@ void compute_f2_32D_ama_all_traj(const double XXP_LIMIT_, const int TMIN_, const
   const int TYPE = 0;
   const int TMIN = TMIN_;
   const std::string MOD = MOD_;
-  // const std::string MOD = "xyp>=xy";
-  // const std::string MOD = "xy>=xyp";
   const int NUM_PAIRS_IN_CONFIG = 1024;
   const int NUM_PAIRS_JUMP = 1024;
   std::string pair_info_file = "/home/tucheng/qcdlib-python/hlbl-pi0.out/";
@@ -2356,31 +2353,33 @@ void compute_f2_32D_ama_all_traj(const double XXP_LIMIT_, const int TMIN_, const
       continue;
     }
 
-    // set pairs
-    std::vector<Y_And_Rotation_Info_Elem> pairs_info(pairs_info_all.begin() + i_pairs_start, pairs_info_all.begin() + i_pairs_start + NUM_PAIRS_JUMP);
-    main_displayln_info(ssprintf("Y_And_Rotation_Info_Elem Index: %08d - %08d", i_pairs_start, i_pairs_start + NUM_PAIRS_JUMP));
+    if (obtain_lock(one_pair_save_folder + "-lock")) {
+      // set pairs
+      std::vector<Y_And_Rotation_Info_Elem> pairs_info(pairs_info_all.begin() + i_pairs_start, pairs_info_all.begin() + i_pairs_start + NUM_PAIRS_JUMP);
+      main_displayln_info(ssprintf("Y_And_Rotation_Info_Elem Index: %08d - %08d", i_pairs_start, i_pairs_start + NUM_PAIRS_JUMP));
 
-    // read pgge
-    PionGGElemField pgge_field_1;
-    PionGGElemField pgge_field_2;
-    const std::string PGGE_FIELD_PATH_1 = THREE_POINT_ENSEMBLE_PATH + ssprintf("/results=%04d/ama ; t-min=%04d", traj_list[i_pgge_1], TMIN);
-    const std::string PGGE_FIELD_PATH_2 = THREE_POINT_ENSEMBLE_PATH + ssprintf("/results=%04d/ama ; t-min=%04d", traj_list[i_pgge_2], TMIN);
-    if (!does_file_exist_sync_node(PGGE_FIELD_PATH_1 + "/avg_checkpoint") or !does_file_exist_sync_node(PGGE_FIELD_PATH_2 + "/avg_checkpoint")){
-      main_displayln_info(ssprintf("PionGG Field are not completed, %04d, %04d", traj_list[i_pgge_1], traj_list[i_pgge_2]));
-      continue;
+      // read pgge
+      PionGGElemField pgge_field_1;
+      PionGGElemField pgge_field_2;
+      const std::string PGGE_FIELD_PATH_1 = THREE_POINT_ENSEMBLE_PATH + ssprintf("/results=%04d/ama ; t-min=%04d", traj_list[i_pgge_1], TMIN);
+      const std::string PGGE_FIELD_PATH_2 = THREE_POINT_ENSEMBLE_PATH + ssprintf("/results=%04d/ama ; t-min=%04d", traj_list[i_pgge_2], TMIN);
+      if (!does_file_exist_sync_node(PGGE_FIELD_PATH_1 + "/avg_checkpoint") or !does_file_exist_sync_node(PGGE_FIELD_PATH_2 + "/avg_checkpoint")){
+        main_displayln_info(ssprintf("PionGG Field are not completed, %04d, %04d", traj_list[i_pgge_1], traj_list[i_pgge_2]));
+        release_lock();
+        continue;
+      }
+      std::string AVG_PGGE_FIELD_PATH_1 = PGGE_FIELD_PATH_1 + ssprintf("/avg ; type=%d", TYPE);
+      main_displayln_info("Read AVG_PGGE_FIELD_1 from: " + AVG_PGGE_FIELD_PATH_1);
+      dist_read_field(pgge_field_1, AVG_PGGE_FIELD_PATH_1);
+      std::string AVG_PGGE_FIELD_PATH_2 = PGGE_FIELD_PATH_2 + ssprintf("/avg ; type=%d", TYPE);
+      main_displayln_info("Read AVG_PGGE_FIELD_2 from: " + AVG_PGGE_FIELD_PATH_2);
+      dist_read_field(pgge_field_2, AVG_PGGE_FIELD_PATH_2);
+
+      // compute f2
+      qmkdir_sync_node(one_pair_save_folder);
+      avg_f2_table_from_three_point_corr_from_y_and_rotation_info(pairs_info, pgge_field_1, pgge_field_2, XXP_LIMIT, MUON, PION, one_pair_save_folder, MOD, NUM_PAIRS_IN_CONFIG);
+      release_lock();
     }
-    std::string AVG_PGGE_FIELD_PATH_1 = PGGE_FIELD_PATH_1 + ssprintf("/avg ; type=%d", TYPE);
-    main_displayln_info("Read AVG_PGGE_FIELD_1 from: " + AVG_PGGE_FIELD_PATH_1);
-    dist_read_field(pgge_field_1, AVG_PGGE_FIELD_PATH_1);
-    std::string AVG_PGGE_FIELD_PATH_2 = PGGE_FIELD_PATH_2 + ssprintf("/avg ; type=%d", TYPE);
-    main_displayln_info("Read AVG_PGGE_FIELD_2 from: " + AVG_PGGE_FIELD_PATH_2);
-    dist_read_field(pgge_field_2, AVG_PGGE_FIELD_PATH_2);
-    // read_pionggelemfield_without_accuracy_and_avg(pgge_field_1, PGGE_FIELD_PATH_1, TYPE);
-    // read_pionggelemfield_without_accuracy_and_avg(pgge_field_2, PGGE_FIELD_PATH_2, TYPE);
-
-    // compute f2
-    qmkdir_sync_node(one_pair_save_folder);
-    avg_f2_table_from_three_point_corr_from_y_and_rotation_info(pairs_info, pgge_field_1, pgge_field_2, XXP_LIMIT, MUON, PION, one_pair_save_folder, MOD, NUM_PAIRS_IN_CONFIG);
   }
 }
 
@@ -2442,15 +2441,19 @@ void compute_point_point_wall_correlator_sloppy_24D_all_traj()
 void compute_point_point_wall_correlator_ama_24D_all_traj()
 {
   // prepare traj_list
-  std::vector<int> traj_list = {1130};
+  // std::vector<int> traj_list = {1130};
   // std::vector<int> traj_list = {1010, 1030, 1050, 1070, 1090, 1110, 1140, 1160, 1180, 1220, 1240, 1260, 1280, 1300, 1320, 1360, 1380, 1400, 1420, 1440, 1460, 1480, 1500, 1520, 1540, 1560, 1580, 1600, 1620, 1640, 1660, 1680, 1700, 1720, 1740, 1760, 1780, 1800, 1820, 1840, 1860, 1880, 1900, 1920, 1940, 1960, 1980, 2000, 2020, 2040, 2060, 2080, 2120, 2140, 2160, 2180, 2200, 2220, 2240, 2260, 2280};
-  main_displayln_info(ssprintf("Num of Configurations: %d", traj_list.size()));
+  // main_displayln_info(ssprintf("Num of Configurations: %d", traj_list.size()));
 
   const std::string ENSEMBLE = "24D";
   const int T_MIN = 10;
   const std::string FIELD_OUT_ENSEMBLE_PATH = "ThreePointCorrField/24D/ama";
   double PION = 0.13975;
   const int TYPE = 0;
+  const int num_wall_sloppy = 64;
+  const int num_wall_exact = 2;
+  const double prob = 1. - std::pow(1. - 1. / (double) num_wall_sloppy, num_wall_exact);
+  const double WALL_SLOPPY_EXACT_RATIO = 1. / prob;
 
   qmkdir_sync_node("ThreePointCorrField");
   qmkdir_sync_node("ThreePointCorrField/24D");
@@ -2462,11 +2465,22 @@ void compute_point_point_wall_correlator_ama_24D_all_traj()
   main_displayln_info(ssprintf("PION: %f", PION));
   main_displayln_info(ssprintf("TYPE: %d", TYPE));
 
+  // check complecity
+  std::vector<int> traj_list = {1900};
+  for (int i = 1000; i < 2281; i += 10) {
+    const std::string point_file = "/home/ljin/application/Public/Muon-GM2-cc/jobs/" + ENSEMBLE + ssprintf("/discon-1/results/results=%d/checkpoint/computeContractionInf", i);
+    const std::string wall_file = "/home/ljin/application/Public/Qlat-CPS-cc/jobs/" + ENSEMBLE + ssprintf("/wall-src/results/results=%d/checkpoint", i);
+    std::string exact_wall_file = "/home/ljin/application/Public/Qlat-CPS-cc/jobs/" + ENSEMBLE + ssprintf("/wall-src-exact-2/results/24D-0.00107/results=%d/checkpoint.txt", i);
+    if (!does_file_exist_sync_node(point_file) or !does_file_exist_sync_node(wall_file) or !does_file_exist_sync_node(exact_wall_file)) {continue;}
+    traj_list.push_back(i);
+  }
+  main_displayln_info(ssprintf("Num of Configurations: %d", traj_list.size()));
+
   for (int i = 0; i < traj_list.size(); ++i)
   {
     main_displayln_info(ssprintf("Compute Point Point to Wall Corr [traj=%d]", traj_list[i]));
     const std::string WALL_SRC_PATH = "/home/ljin/application/Public/Qlat-CPS-cc/jobs/" + ENSEMBLE + ssprintf("/wall-src/results/results=%d/huge-data/wall_src_propagator", traj_list[i]);
-    const std::string EXACT_WALL_SRC_PATH = "/home/ljin/application/Public/Qlat-CPS-cc/jobs/" + ENSEMBLE + ssprintf("/wall-src-exact/results/24D-0.00107/results=%d/huge-data/wall_src_propagator", traj_list[i]);
+    const std::string EXACT_WALL_SRC_PATH = "/home/ljin/application/Public/Qlat-CPS-cc/jobs/" + ENSEMBLE + ssprintf("/wall-src-exact-2/results/24D-0.00107/results=%d/huge-data/wall_src_propagator", traj_list[i]);
     const std::string GAUGE_TRANSFORM_PATH = "/home/ljin/application/Public/Qlat-CPS-cc/jobs/" + ENSEMBLE + ssprintf("/wall-src/results/results=%d/huge-data/gauge-transform", traj_list[i]);
     const std::string POINT_SRC_PATH = "/home/ljin/application/Public/Muon-GM2-cc/jobs/" + ENSEMBLE + ssprintf("/discon-1/results/prop-hvp ; results=%d/huge-data/prop-point-src", traj_list[i]);
 
@@ -2477,7 +2491,18 @@ void compute_point_point_wall_correlator_ama_24D_all_traj()
 
     const std::string FIELD_OUT_TRAJ_PATH = FIELD_OUT_ENSEMBLE_PATH + "/" + ssprintf("results=%04d", traj_list[i]);
     qmkdir_sync_node(FIELD_OUT_TRAJ_PATH);
-    compute_point_point_wall_correlator_ama_in_one_traj(T_MIN, WALL_SRC_PATH, EXACT_WALL_SRC_PATH, GAUGE_TRANSFORM_PATH, POINT_SRC_PATH, FIELD_OUT_TRAJ_PATH, PION, TYPE);
+    const std::string PGGE_FIELD_PATH = FIELD_OUT_ENSEMBLE_PATH + ssprintf("/results=%04d/ama ; t-min=%04d", traj_list[i], T_MIN);
+    if (does_file_exist_sync_node(PGGE_FIELD_PATH + "/avg_checkpoint")) {
+      main_displayln_info("Avg PionGGElemField Has Already Completed In: " + PGGE_FIELD_PATH);
+      continue;
+    }
+
+    if (obtain_lock(FIELD_OUT_TRAJ_PATH + "-lock")) {
+      compute_point_point_wall_correlator_ama_in_one_traj(T_MIN, WALL_SRC_PATH, EXACT_WALL_SRC_PATH, GAUGE_TRANSFORM_PATH, WALL_SLOPPY_EXACT_RATIO, POINT_SRC_PATH, FIELD_OUT_TRAJ_PATH, PION, TYPE);
+      // avg and remove
+      avg_pionggelemfield_without_accuracy_and_rm(PGGE_FIELD_PATH, TYPE);
+      release_lock();
+    }
   }
 }
 
@@ -2510,7 +2535,7 @@ void compute_point_point_wall_correlator_sloppy_32D_all_traj()
     traj_list.push_back(i);
     main_displayln_info(ssprintf("Valid Configuration: %d", i));
   }
-  // traj_list = {1370};
+  traj_list = {1370};
   main_displayln_info(ssprintf("Num of Configurations: %d", traj_list.size()));
 
   for (int i = 0; i < traj_list.size(); ++i)
@@ -2529,8 +2554,8 @@ void compute_point_point_wall_correlator_sloppy_32D_all_traj()
     compute_point_point_wall_correlator_in_one_traj(T_MIN, WALL_SRC_PATH, GAUGE_TRANSFORM_PATH, POINT_SRC_PATH, FIELD_OUT_TRAJ_PATH, PION, TYPE, ACCURACY);
 
     // avg and remove
-    const std::string PGGE_FIELD_PATH = FIELD_OUT_ENSEMBLE_PATH + ssprintf("/results=%04d/t-min=%04d", traj_list[i], T_MIN);
-    avg_pionggelemfield_with_accuracy_and_rm(PGGE_FIELD_PATH, TYPE, ACCURACY);
+    // const std::string PGGE_FIELD_PATH = FIELD_OUT_ENSEMBLE_PATH + ssprintf("/results=%04d/t-min=%04d", traj_list[i], T_MIN);
+    // avg_pionggelemfield_with_accuracy_and_rm(PGGE_FIELD_PATH, TYPE, ACCURACY);
   }
 }
 
@@ -2541,6 +2566,10 @@ void compute_point_point_wall_correlator_ama_32D_all_traj()
   const std::string FIELD_OUT_ENSEMBLE_PATH = "ThreePointCorrField/32D-0.00107/ama";
   double PION = 0.139474;
   const int TYPE = 0;
+  const int num_wall_sloppy = 64;
+  const int num_wall_exact = 2;
+  const double prob = 1. - std::pow(1. - 1. / (double) num_wall_sloppy, num_wall_exact);
+  const double WALL_SLOPPY_EXACT_RATIO = 1. / prob;
 
   qmkdir_sync_node("ThreePointCorrField");
   qmkdir_sync_node("ThreePointCorrField/32D-0.00107");
@@ -2596,7 +2625,7 @@ void compute_point_point_wall_correlator_ama_32D_all_traj()
     }
 
     if (obtain_lock(FIELD_OUT_TRAJ_PATH + "-lock")) {
-      compute_point_point_wall_correlator_ama_in_one_traj(T_MIN, WALL_SRC_PATH, EXACT_WALL_SRC_PATH, GAUGE_TRANSFORM_PATH, POINT_SRC_PATH, FIELD_OUT_TRAJ_PATH, PION, TYPE);
+      compute_point_point_wall_correlator_ama_in_one_traj(T_MIN, WALL_SRC_PATH, EXACT_WALL_SRC_PATH, GAUGE_TRANSFORM_PATH, WALL_SLOPPY_EXACT_RATIO, POINT_SRC_PATH, FIELD_OUT_TRAJ_PATH, PION, TYPE);
 
       // avg and remove
       avg_pionggelemfield_without_accuracy_and_rm(PGGE_FIELD_PATH, TYPE);
@@ -2605,12 +2634,13 @@ void compute_point_point_wall_correlator_ama_32D_all_traj()
   }
 }
 
+# if 0
 void compute_point_point_wall_correlator_ama_48I_all_traj()
 {
   const std::string ENSEMBLE = "48I";
   const int T_MIN = 10;
   const std::string FIELD_OUT_ENSEMBLE_PATH = "ThreePointCorrField/48I-0.00078/ama";
-  double PION;
+  double PION = 0.08049;
   const int TYPE = 0;
 
   qmkdir_sync_node("ThreePointCorrField");
@@ -2626,8 +2656,8 @@ void compute_point_point_wall_correlator_ama_48I_all_traj()
   // check complecity
   std::vector<int> traj_list;
   for (int i = 990; i < 2000; i += 20) {
-    std::string point_file = "/home/ljin/application/Public/Muon-GM2-cc/jobs/" + ENSEMBLE + ssprintf("/discon-1/results/results=%d/checkpoint/computeContractionInf", i);
     std::string wall_file = ssprintf("/home/ljin/application/Public/Qlat-CPS-cc/jobs/48I/wall-src/results/48I-0.00078/results=%d/checkpoint.txt", i);
+    std::string point_file = ssprintf("/home/ljin/application/Public/Muon-GM2-cc/jobs/48I/discon-strange-2-new/results/results=%d/checkpoint/computeContractionInf", i);
     if (!does_file_exist_sync_node(point_file) or !does_file_exist_sync_node(wall_file)) {continue;}
 
     traj_list.push_back(i);
@@ -2638,10 +2668,10 @@ void compute_point_point_wall_correlator_ama_48I_all_traj()
   for (int i = 0; i < traj_list.size(); ++i)
   {
     main_displayln_info(ssprintf("Compute Point Point to Wall Corr [traj=%d]", traj_list[i]));
-    const std::string WALL_SRC_PATH = "/home/ljin/application/Public/Qlat-CPS-cc/jobs/" + ENSEMBLE + ssprintf("/wall-src/results/32D-0.00107/results=%d/huge-data/wall_src_propagator", traj_list[i]);
-    const std::string EXACT_WALL_SRC_PATH = "/home/ljin/application/Public/Qlat-CPS-cc/jobs/" + ENSEMBLE + ssprintf("/wall-src-exact-2/results/32D-0.00107/results=%d/huge-data/wall_src_propagator", traj_list[i]);
-    const std::string GAUGE_TRANSFORM_PATH = "/home/ljin/application/Public/Qlat-CPS-cc/jobs/" + ENSEMBLE + ssprintf("/wall-src/results/32D-0.00107/results=%d/huge-data/gauge-transform", traj_list[i]);
-    const std::string POINT_SRC_PATH = "/home/ljin/application/Public/Muon-GM2-cc/jobs/" + ENSEMBLE + ssprintf("/discon-1/results/prop-hvp ; results=%d/huge-data/prop-point-src", traj_list[i]);
+    const std::string WALL_SRC_PATH = ssprintf("/home/ljin/application/Public/Qlat-CPS-cc/jobs/48I/wall-src/results/48I-0.00078/results=%d/huge-data/wall_src_propagator", traj_list[i]);
+    const std::string EXACT_WALL_SRC_PATH = ssprintf("/home/ljin/application/Public/Qlat-CPS-cc/jobs/48I/wall-src/results/48I-0.00078/results=%d/huge-data/wall_src_propagator", traj_list[i]);
+    const std::string GAUGE_TRANSFORM_PATH = ssprintf("/home/ljin/application/Public/Qlat-CPS-cc/jobs/48I/wall-src/results/48I-0.00078/results=%d/huge-data/gauge-transform", traj_list[i]);
+    const std::string POINT_SRC_PATH = ssprintf("/home/ljin/application/Public/Muon-GM2-cc/jobs/48I/discon-strange-2-new/results/prop-hvp ; results=%d/huge-data/prop-point-src", traj_list[i]);
 
     main_displayln_info("WALL_SRC_PATH: " + WALL_SRC_PATH);
     main_displayln_info("EXACT_WALL_SRC_PATH: " + EXACT_WALL_SRC_PATH);
@@ -2657,6 +2687,7 @@ void compute_point_point_wall_correlator_ama_48I_all_traj()
     avg_pionggelemfield_without_accuracy_and_rm(PGGE_FIELD_PATH, TYPE);
   }
 }
+#endif
 
 void compute_wall_wall_corr_24D()
 {
@@ -2861,7 +2892,7 @@ int main(int argc, char* argv[])
 
   compute_three_point_corr_model(three_point_correlator_labeled_xp, TSEP, PION);
 
-  double XXP_LIMIT = 20;
+  double XXP_LIMIT = 21;
   double MUON = 0.1056583745 / AINV;
   std::string pair_info_file = "/home/tucheng/qcdlib-python/hlbl-pi0.out/";
   // pair_info_file += "y_and_rotation_angles_distr:m=0,a=2,r_left=5,r_mid=40,r_right=60,npairs:4096";
