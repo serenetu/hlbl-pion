@@ -1113,6 +1113,374 @@ void find_e_xbbm_table(Complex_Table& e_xbbm_table, const XB& xb, const BM_TABLE
   }
 }
 
+inline std::string get_point_src_props_path(const std::string& job_tag,
+                                            const int traj)
+{
+  std::string path;
+  if (job_tag == "24D-0.00107") {
+    path =
+        "/home/ljin/application/Public/Muon-GM2-cc/jobs/24D/discon-1/results";
+    if (does_file_exist_sync_node(
+            path +
+            ssprintf("/results=%d/checkpoint/computeContractionInf", traj)) and
+        does_file_exist_sync_node(
+            path + ssprintf("/prop-hvp ; results=%d/on-disk", traj))) {
+      return path +
+             ssprintf("/prop-hvp ; results=%d/huge-data/prop-point-src", traj);
+    }
+  } else if (job_tag == "32D-0.00107") {
+    path =
+        "/home/ljin/application/Public/Muon-GM2-cc/jobs/32D/discon-1/results";
+    if (does_file_exist_sync_node(
+            path +
+            ssprintf("/results=%d/checkpoint/computeContractionInf", traj)) and
+        does_file_exist_sync_node(
+            path + ssprintf("/prop-hvp ; results=%d/on-disk", traj))) {
+      return path +
+             ssprintf("/prop-hvp ; results=%d/huge-data/prop-point-src", traj);
+    }
+  } else if (job_tag == "32Dfine-0.0001") {
+    path =
+        "/home/ljin/application/Public/Muon-GM2-cc/jobs/32Dfine/discon-1/"
+        "results";
+    if (does_file_exist_sync_node(
+            path +
+            ssprintf("/results=%d/checkpoint/computeContractionInf", traj)) and
+        does_file_exist_sync_node(
+            path + ssprintf("/prop-hvp ; results=%d/on-disk", traj))) {
+      return path +
+             ssprintf("/prop-hvp ; results=%d/huge-data/prop-point-src", traj);
+    }
+  } else if (job_tag == "48I-0.00078") {
+    qassert(traj % 5 == 0);
+    path =
+        "/home/ljin/application/Public/Muon-GM2-cc/jobs/48I/"
+        "discon-strange-2-new/results";
+    if (does_file_exist_sync_node(
+            path + ssprintf("/results=%d/checkpoint/computeContractionInf",
+                            traj / 5)) and
+        does_file_exist_sync_node(
+            path + ssprintf("/prop-hvp ; results=%d/on-disk", traj / 5))) {
+      return path + ssprintf("/prop-hvp ; results=%d/huge-data/prop-point-src",
+                             traj / 5);
+    }
+  } else {
+    qassert(false);
+  }
+  return "";
+}
+
+inline std::string get_point_src_prop_path(const std::string& job_tag, 
+                                           const int traj,
+                                           const Coordinate& xg, 
+                                           const int type, 
+                                           const int accuracy)
+{
+  std::string path = get_point_src_props_path(job_tag, traj);
+  if (path == "") {return "";}
+  std::string full_path = path + ssprintf("/xg=(%d,%d,%d,%d) ; type=%d ; accuracy=%d", xg[0], xg[1], xg[2], xg[3], type, accuracy);
+  if (does_file_exist_sync_node(full_path)) {return full_path;}
+  return "";
+}
+
+inline std::string get_gauge_transform_path(const std::string& job_tag,
+                                            const int traj)
+{
+  std::string path;
+  if (job_tag == "24D-0.00107") {
+    path = ssprintf(
+        "/home/ljin/application/Public/Qlat-CPS-cc/jobs/24D/wall-src/results/"
+        "results=%d/huge-data/gauge-transform",
+        traj);
+    if (does_file_exist_sync_node(path + "/checkpoint")) {
+      return path;
+    }
+  } else if (job_tag == "32D-0.00107") {
+    path = ssprintf(
+        "/home/ljin/application/Public/Qlat-CPS-cc/jobs/32D/wall-src/results/"
+        "32D-0.00107/results=%d/huge-data/gauge-transform",
+        traj);
+    if (does_file_exist_sync_node(path + "/checkpoint")) {
+      return path;
+    }
+  } else if (job_tag == "32Dfine-0.0001") {
+    path = ssprintf(
+        "/home/ljin/application/Public/Qlat-CPS-cc/jobs/32Dfine/wall-src/"
+        "results/32Dfine-0.0001/results=%d/huge-data/gauge-transform",
+        traj);
+    if (does_file_exist_sync_node(path + "/checkpoint")) {
+      return path;
+    }
+  } else if (job_tag == "48I-0.00078") {
+    path = ssprintf(
+        "/home/ljin/application/Public/Qlat-CPS-cc/jobs/48I/wall-src/results/"
+        "48I-0.00078/results=%d/huge-data/gauge-transform",
+        traj);
+    if (does_file_exist_sync_node(path + "/checkpoint")) {
+      return path;
+    }
+  } else {
+    qassert(false);
+  }
+  return "";
+}
+
+inline std::string get_wall_src_props_sloppy_path(const std::string& job_tag, const int traj)
+{
+  std::string path;
+  if (job_tag == "24D-0.00107") {
+    path = ssprintf(
+        "/home/ljin/application/Public/Qlat-CPS-cc/jobs/24D/wall-src/results/"
+        "results=%d",
+        traj);
+    if (does_file_exist_sync_node(path + "/checkpoint")) {
+      return path + "/huge-data/wall_src_propagator";
+    }
+  } else if (job_tag == "32D-0.00107") {
+    path = ssprintf(
+        "/home/ljin/application/Public/Qlat-CPS-cc/jobs/32D/wall-src/results/"
+        "32D-0.00107/results=%d",
+        traj);
+    if (does_file_exist_sync_node(path + "/checkpoint.txt")) {
+      return path + "/huge-data/wall_src_propagator";
+    }
+  } else if (job_tag == "32Dfine-0.0001") {
+    path = ssprintf(
+        "/home/ljin/application/Public/Qlat-CPS-cc/jobs/32Dfine/wall-src/"
+        "results/32Dfine-0.0001/results=%d",
+        traj);
+    if (does_file_exist_sync_node(path + "/checkpoint.txt")) {
+      return path + "/huge-data/wall_src_propagator";
+    }
+  } else if (job_tag == "48I-0.00078") {
+    path = ssprintf(
+        "/home/ljin/application/Public/Qlat-CPS-cc/jobs/48I/wall-src/results/"
+        "48I-0.00078/results=%d",
+        traj);
+    if (does_file_exist_sync_node(path + "/checkpoint.txt")) {
+      return path + "/huge-data/wall_src_propagator";
+    }
+  } else {
+    qassert(false);
+  }
+  return "";
+}
+
+inline std::string get_wall_src_prop_sloppy_path(const std::string& job_tag, const int traj, const int tslice)
+{
+  const std::string path_config = get_wall_src_props_sloppy_path(job_tag, traj);
+  if (path_config == "") {return "";}
+  const std::string path =
+      path_config + ssprintf("/t=%d", tslice);
+  if (does_file_exist_sync_node(path + "/checkpoint")) {
+    return path;
+  }
+  return "";
+}
+
+inline std::string get_wall_src_props_exact_path(const std::string& job_tag, const int traj)
+{
+  std::string path;
+  if (job_tag == "24D-0.00107") {
+    path = ssprintf(
+        "/home/ljin/application/Public/Qlat-CPS-cc/jobs/24D/wall-src-exact-2/"
+        "results/24D-0.00107/results=%d",
+        traj);
+    if (does_file_exist_sync_node(path + "/checkpoint.txt")) {
+      return path + "/huge-data/wall_src_propagator";
+    }
+  } else if (job_tag == "32D-0.00107") {
+    path = ssprintf(
+        "/home/ljin/application/Public/Qlat-CPS-cc/jobs/32D/wall-src-exact-2/"
+        "results/32D-0.00107/results=%d",
+        traj);
+    if (does_file_exist_sync_node(path + "/checkpoint.txt")) {
+      return path + "/huge-data/wall_src_propagator";
+    }
+  } else if (job_tag == "32Dfine-0.0001") {
+    path = ssprintf(
+        "/home/ljin/application/Public/Qlat-CPS-cc/jobs/32Dfine/wall-src/"
+        "results/32Dfine-0.0001/results=%d",
+        traj);
+    if (does_file_exist_sync_node(path + "/checkpoint.txt")) {
+      return path + "/huge-data/wall_src_propagator";
+    }
+  } else if (job_tag == "48I-0.00078") {
+    path = ssprintf(
+        "/home/ljin/application/Public/Qlat-CPS-cc/jobs/48I/wall-src/results/"
+        "48I-0.00078/results=%d",
+        traj);
+    if (does_file_exist_sync_node(path + "/checkpoint.txt")) {
+      return path + "/huge-data/wall_src_propagator";
+    }
+  } else {
+    qassert(false);
+  }
+  return "";
+}
+
+inline std::string get_wall_src_prop_exact_path(const std::string& job_tag, const int traj, const int tslice)
+{
+  const std::string path_config = get_wall_src_props_exact_path(job_tag, traj);
+  if (path_config == "") {return "";}
+  const std::string path =
+      path_config +
+      ssprintf("/exact ; t=%d", tslice);
+  if (does_file_exist_sync_node(path + "/checkpoint")) {
+    return path;
+  }
+  return "";
+}
+
+struct TwoPointWallEnsembleInfo {
+  std::string ENSEMBLE;
+  double PION;
+  std::string ACCURACY;
+
+  int T_MIN;
+  int TYPE = 0;
+  std::vector<int> TRAJ_LIST;
+  std::string FIELD_OUT_PATH = "TwoPointWallCorrField";
+  std::string FIELD_ENSEMBLE_ACCURACY_TMIN_OUT_PATH;
+
+  int NUM_WALL_SLOPPY;
+  int NUM_WALL_EXACT;
+  double WALL_SLOPPY_EXACT_RATIO;
+
+  int NUM_POINT_SLOPPY;
+  int NUM_POINT_EXACT_1;
+  int NUM_POINT_EXACT_2;
+
+  void init(const std::string& ensemble_, const std::string& accuracy_) {
+    ENSEMBLE = ensemble_;
+    ACCURACY = accuracy_;
+    qassert(ACCURACY == "ama" || ACCURACY == "sloppy");
+    if (ENSEMBLE == "24D-0.00107") {
+      PION = 0.13975;
+      T_MIN = 10;
+      NUM_POINT_SLOPPY = 1024;
+      NUM_POINT_EXACT_1 = 32;
+      NUM_POINT_EXACT_2 = 8;
+    } else if (ENSEMBLE == "32D-0.00107") {
+      PION = 0.139474;
+      T_MIN = 10;
+    } else {
+      qassert(false);
+    }
+    FIELD_ENSEMBLE_ACCURACY_TMIN_OUT_PATH = FIELD_OUT_PATH + "/" + ENSEMBLE + "/" + ACCURACY + ssprintf("/t-min=%04d", T_MIN);
+  }
+
+  void compute_wall_ratio() {
+    qassert(NUM_WALL_SLOPPY != 0 && NUM_WALL_EXACT != 0);
+    const double prob = 1. - std::pow(1. - 1. / (double) NUM_WALL_SLOPPY, (double) NUM_WALL_EXACT);
+    WALL_SLOPPY_EXACT_RATIO = 1. / prob;
+  }
+
+  void show_info() const {
+    main_displayln_info("ENSEMBLE: " + ENSEMBLE);
+    main_displayln_info("ACCURACY: " + ACCURACY);
+    main_displayln_info(ssprintf("PION: %f", PION));
+    main_displayln_info(ssprintf("T_MIN: %d", T_MIN));
+    main_displayln_info(ssprintf("TYPE: %d", TYPE));
+    main_displayln_info("FIELD_OUT_PATH: " + FIELD_OUT_PATH);
+    main_displayln_info("FIELD_ENSEMBLE_ACCURACY_TMIN_OUT_PATH: " + FIELD_ENSEMBLE_ACCURACY_TMIN_OUT_PATH);
+    if (ACCURACY == "ama") {
+      main_displayln_info(ssprintf("NUM_WALL_SLOPPY: %d", NUM_WALL_SLOPPY));
+      main_displayln_info(ssprintf("NUM_WALL_EXACT: %d", NUM_WALL_EXACT));
+      main_displayln_info(ssprintf("WALL_SLOPPY_EXACT_RATIO: %f", WALL_SLOPPY_EXACT_RATIO));
+    }
+  }
+
+  TwoPointWallEnsembleInfo(const std::string& ensemble_, const std::string& accuracy_) {
+    init(ensemble_, accuracy_);
+    if (accuracy_ == "ama") {
+      NUM_WALL_SLOPPY = 64;
+      NUM_WALL_EXACT = 2;
+      compute_wall_ratio();
+    }
+    show_info();
+  }
+
+  void make_field_ensemble_accuracy_tmin_dir() const {
+    qassert(FIELD_OUT_PATH != "" && ENSEMBLE != "" && ACCURACY != "");
+    qmkdir_sync_node(FIELD_OUT_PATH);
+    qmkdir_sync_node(FIELD_OUT_PATH + "/" + ENSEMBLE);
+    qmkdir_sync_node(FIELD_OUT_PATH + "/" + ENSEMBLE + "/" + ACCURACY);
+    qmkdir_sync_node(FIELD_ENSEMBLE_ACCURACY_TMIN_OUT_PATH);
+  }
+
+  std::string get_field_traj_dir(const int traj) const {
+    return FIELD_ENSEMBLE_ACCURACY_TMIN_OUT_PATH + ssprintf("/results=%04d", traj);
+  }
+  
+  void make_field_traj_dir(const int traj) const {
+    const std::string field_traj_path = get_field_traj_dir(traj);
+    qmkdir_sync_node(field_traj_path);
+  }
+
+  bool is_traj_computed(const int traj) const {
+    return does_file_exist_sync_node(FIELD_ENSEMBLE_ACCURACY_TMIN_OUT_PATH + ssprintf("/results=%04d/avg_checkpoint", traj));
+  }
+
+  bool props_is_ready(const int traj) const {
+    const std::string point_path = get_point_src_props_path(ENSEMBLE, traj);
+    const std::string gt_path = get_gauge_transform_path(ENSEMBLE, traj);
+    const std::string wall_path = get_wall_src_props_sloppy_path(ENSEMBLE, traj);
+    if (ACCURACY == "sloppy") {return point_path != "" && gt_path != "" && wall_path != "";}
+    const std::string exact_wall_path = get_wall_src_props_exact_path(ENSEMBLE, traj);
+    if (ACCURACY == "ama") {return point_path != "" && gt_path != "" && wall_path != "" && exact_wall_path != "";}
+    return false;
+  }
+
+  std::vector<int> get_num_point_prop_sloppy_exact(const int traj) const {
+    const std::string point_src_path = get_point_src_props_path(ENSEMBLE, traj);
+    const std::vector<std::string> point_src_prop_list = list_folders_under_path(point_src_path);
+    int num_0 = 0, num_1 = 0, num_2 = 0;
+    for (int i =0; i < point_src_prop_list.size(); ++i){
+      const Coordinate point_src_coor = get_xg_from_path(point_src_prop_list[i]);
+      const std::string fname_0 = ssprintf("xg=(%d,%d,%d,%d) ; type=%d ; accuracy=%d", point_src_coor[0], point_src_coor[1], point_src_coor[2], point_src_coor[3], TYPE, 0);
+      if (fname_0 != point_src_prop_list[i]) {continue; }
+      num_0 += 1;
+
+      const std::string fname_1 = ssprintf("xg=(%d,%d,%d,%d) ; type=%d ; accuracy=%d", point_src_coor[0], point_src_coor[1], point_src_coor[2], point_src_coor[3], TYPE, 1);
+      if (!does_file_exist_sync_node(point_src_path + "/" + fname_1)) {continue;}
+      num_1 += 1;
+
+      const std::string fname_2 = ssprintf("xg=(%d,%d,%d,%d) ; type=%d ; accuracy=%d", point_src_coor[0], point_src_coor[1], point_src_coor[2], point_src_coor[3], TYPE, 2);
+      if (!does_file_exist_sync_node(point_src_path + "/" + fname_2)) {continue;}
+      num_2 += 1;
+    }
+    std::vector<int> res = {num_0, num_1, num_2};
+    return res;
+  }
+
+  std::vector<Coordinate> get_point_xg_list(const int traj) const {
+    const std::string point_src_path = get_point_src_props_path(ENSEMBLE, traj);
+    const std::vector<std::string> point_src_prop_list = list_folders_under_path(point_src_path);
+    std::vector<Coordinate> res;
+    for (int i = 0; i < point_src_prop_list.size(); ++i){
+      if (read_type(point_src_prop_list[i]) != TYPE or read_accuracy(point_src_prop_list[i]) != 0) {continue; }
+      res.push_back(get_xg_from_path(point_src_prop_list[i]));
+    }
+    return res;
+  }
+
+  std::string get_field_traj_xg_path(const int traj, const Coordinate& xg) const {
+    const std::string field_out_coor_path = get_field_traj_dir(traj) + ssprintf("/xg=(%d,%d,%d,%d) ; type=%d", xg[0], xg[1], xg[2], xg[3], TYPE);
+    return field_out_coor_path;
+  }
+
+  void make_field_traj_xg_dir(const int traj, const Coordinate& xg) const {
+    const std::string field_out_coor_path = get_field_traj_xg_path(traj, xg);
+    qmkdir_sync_node(field_out_coor_path);
+  }
+
+  bool is_traj_xg_computed(const int traj, const Coordinate& xg) const {
+    const std::string field_out_coor_path = get_field_traj_xg_path(traj, xg);
+    return does_file_exist_sync_node(field_out_coor_path + "/checkpoint");
+  }
+};
+
 QLAT_END_NAMESPACE
 
 using namespace qlat;
@@ -1569,12 +1937,196 @@ void compute_point_point_wall_correlator_in_one_traj(const int t_min, const std:
   qtouch_info(field_out_tmin_path + "/checkpoint");
 }
 
+void load_point_xg_prop(Propagator4d& point_src_prop, const TwoPointWallEnsembleInfo& ensemble_info, const int traj, const Coordinate& point_src_coor) {
+  const std::string ensemble = ensemble_info.ENSEMBLE;
+  const int type = ensemble_info.TYPE;
+  const std::string accuracy = ensemble_info.ACCURACY;
+
+  // accuracy == 0
+  std::string point_src_0_path = get_point_src_prop_path(ensemble, traj, point_src_coor, type, 0);
+  qassert(point_src_0_path != "");
+  const Propagator4d& point_src_prop_0 = get_prop(point_src_0_path);
+  point_src_prop = point_src_prop_0;
+  
+  if (accuracy == "sloppy") {return;}
+
+  std::vector<int> num_point_prop_sloppy_exact = {ensemble_info.NUM_POINT_SLOPPY, ensemble_info.NUM_POINT_EXACT_1, ensemble_info.NUM_POINT_EXACT_2};
+  // accuracy == 1
+  std::string point_src_1_path = get_point_src_prop_path(ensemble, traj, point_src_coor, type, 1);
+  if (point_src_1_path != "") {
+    const Propagator4d& point_src_prop_1 = get_prop(point_src_1_path);
+    Propagator4d point_src_prop_;
+    point_src_prop_ = point_src_prop_1;
+    point_src_prop_ -= point_src_prop_0;
+    point_src_prop_ *= (1.0 * num_point_prop_sloppy_exact[0] / num_point_prop_sloppy_exact[1]);
+    point_src_prop += point_src_prop_;
+
+    // accuracy == 2
+    std::string point_src_2_path = get_point_src_prop_path(ensemble, traj, point_src_coor, type, 2);
+    if (point_src_1_path != "" && point_src_2_path != "") {
+      const Propagator4d& point_src_prop_2 = get_prop(point_src_2_path);
+      Propagator4d point_src_prop__;
+      point_src_prop__ = point_src_prop_2;
+      point_src_prop__ -= point_src_prop_1;
+      point_src_prop__ *= (1.0 * num_point_prop_sloppy_exact[0] / num_point_prop_sloppy_exact[2]);
+      point_src_prop += point_src_prop__;
+    }
+  }
+
+  if (accuracy == "ama") {
+    return;
+  } else {
+    qassert(false);
+  }
+  return;
+}
+
+void load_gauge_inv(GaugeTransform& gtinv, const std::string& ensemble, const int traj) {
+  TIMER_VERBOSE("load_gauge_inv");
+  const std::string gauge_transform_path = get_gauge_transform_path(ensemble, traj);
+  GaugeTransform gt;
+  dist_read_field(gt, gauge_transform_path);
+  to_from_big_endian_64(get_data(gt));
+  gt_inverse(gtinv, gt);
+}
+
+void load_wall_sloppy_props(std::vector<Propagator4d>& wall_src_list, const GaugeTransform& gtinv, const std::string ensemble, const int traj) {
+  TIMER_VERBOSE("load_wall_sloppy_props");
+  const Coordinate total_site = gtinv.geo.total_site();
+  wall_src_list.resize(total_site[3]);
+  for (int t_wall = 0; t_wall < total_site[3]; ++t_wall){
+    std::string wall_src_t_path = get_wall_src_prop_sloppy_path(ensemble, traj, t_wall);
+    qassert(wall_src_t_path != "");
+    main_displayln_info("Read Sloppy Wall From: " + wall_src_t_path);
+    Propagator4d& wall_src_prop = wall_src_list[t_wall];
+    wall_src_prop = get_wall_prop(wall_src_t_path);
+    Propagator4d wall_src_prop_gauge;
+    prop_apply_gauge_transformation(wall_src_prop_gauge, wall_src_prop, gtinv);
+    wall_src_prop = wall_src_prop_gauge;
+  }
+}
+
+void load_wall_exact_props(std::vector<int>& exact_wall_t_list, std::vector<Propagator4d>& exact_wall_src_list, 
+                          const GaugeTransform& gtinv, const std::string ensemble, const int traj) {
+  TIMER_VERBOSE("load_wall_exact_props");
+  const Coordinate total_site = gtinv.geo.total_site();
+
+  int num_exact = 0;
+  for (int t_wall = 0; t_wall < total_site[3]; ++t_wall){
+    std::string exact_wall_src_t_path = get_wall_src_prop_exact_path(ensemble, traj, t_wall);
+    if (exact_wall_src_t_path == "") {continue;}
+    exact_wall_t_list.push_back(t_wall);
+    num_exact += 1;
+  }
+  exact_wall_src_list.resize(num_exact);
+  for (int i = 0; i < num_exact; ++i){
+    int t_wall = exact_wall_t_list[i];
+    std::string exact_wall_src_t_path = get_wall_src_prop_exact_path(ensemble, traj, t_wall);
+    qassert(exact_wall_src_t_path != "");
+    Propagator4d& exact_wall_src_prop = exact_wall_src_list[i];
+    main_displayln_info("Read Exact Wall From: " + exact_wall_src_t_path);
+    exact_wall_src_prop = get_wall_prop(exact_wall_src_t_path);
+    Propagator4d exact_wall_src_prop_gauge;
+    prop_apply_gauge_transformation(exact_wall_src_prop_gauge, exact_wall_src_prop, gtinv);
+    exact_wall_src_prop = exact_wall_src_prop_gauge;
+  }
+}
+
+void compute_point_point_wall_correlator_ama_in_one_traj(const TwoPointWallEnsembleInfo& ensemble_info, const int traj)
+{
+  TIMER_VERBOSE("compute_point_point_wall_correlator_ama_in_one_traj");
+
+  if (ensemble_info.is_traj_computed(traj)) {
+    main_displayln_info(fname + ssprintf(": traj=%d has already been computed", traj));
+    return;
+  }
+  if (!ensemble_info.props_is_ready(traj)) {
+    main_displayln_info(fname + ssprintf(": props are not ready in traj=%d", traj));
+  }
+
+  const std::string ensemble = ensemble_info.ENSEMBLE;
+  const int type = ensemble_info.TYPE;
+  const double pion = ensemble_info.PION;
+  const int t_min = ensemble_info.T_MIN;
+  const double sloppy_exact_ratio = ensemble_info.WALL_SLOPPY_EXACT_RATIO;
+
+  ensemble_info.make_field_traj_dir(traj);
+  const std::string field_out_path = ensemble_info.get_field_traj_dir(traj);
+
+  // load gauge
+  GaugeTransform gtinv;
+  load_gauge_inv(gtinv, ensemble, traj);
+  const Coordinate total_site = gtinv.geo.total_site();
+
+  // load and gauge inv wall_prop
+  main_displayln_info(std::string(fname) + ": Load And Gauge Inv Wall Src Prop for All T");
+  std::vector<Propagator4d> wall_src_list;
+  load_wall_sloppy_props(wall_src_list, gtinv, ensemble, traj);
+
+  // load and gauge inv exact wall_prop
+  main_displayln_info(std::string(fname) + ": Load And Gauge Inv Exact Wall Src Prop");
+  std::vector<int> exact_wall_t_list;
+  std::vector<Propagator4d> exact_wall_src_list;
+  load_wall_exact_props(exact_wall_t_list, exact_wall_src_list, gtinv, ensemble, traj);
+  main_displayln_info(fname + ssprintf(": Wall Src Num of Sloppy %d, Exact %d", wall_src_list.size(), exact_wall_src_list.size()));
+  main_displayln_info(fname + ssprintf(": WALL_SLOPPY_EXACT_RATIO: %f", sloppy_exact_ratio));
+  
+  // check point src num of sloppy and exact
+  std::vector<int> num_point_prop_sloppy_exact = ensemble_info.get_num_point_prop_sloppy_exact(traj);
+  main_displayln_info(fname + ssprintf("Point Src Num of Accuracy0 %d, Accuracy1 %d, Accuracy2 %d", num_point_prop_sloppy_exact[0], num_point_prop_sloppy_exact[1], num_point_prop_sloppy_exact[2]));
+
+  std::vector<Coordinate> xg_list = ensemble_info.get_point_xg_list(traj);
+  qassert(num_point_prop_sloppy_exact[0] == ensemble_info.NUM_POINT_SLOPPY &&
+          num_point_prop_sloppy_exact[0] == xg_list.size() &&
+          num_point_prop_sloppy_exact[1] == ensemble_info.NUM_POINT_EXACT_1 &&
+          num_point_prop_sloppy_exact[2] == ensemble_info.NUM_POINT_EXACT_2);
+
+  int count = 0;
+  for (int i = 0; i < xg_list.size(); ++i) {
+    // one point src
+    const Coordinate point_src_coor = xg_list[i];
+    if (ensemble_info.is_traj_xg_computed(traj, point_src_coor)) {
+      main_displayln_info(fname + ssprintf(": Two Point to Wall Has Been Computed in traj=%d, xg=(%d,%d,%d,%d)", traj, point_src_coor[0], point_src_coor[1], point_src_coor[2], point_src_coor[3]));
+      count += 1;
+      continue;
+    }
+
+    main_displayln_info(fname + ssprintf(": Compute Two Point to Wall in traj=%d, xg=(%d,%d,%d,%d)", traj, point_src_coor[0], point_src_coor[1], point_src_coor[2], point_src_coor[3]));
+    Propagator4d point_src_prop;
+    load_point_xg_prop(point_src_prop, ensemble_info, traj, point_src_coor);
+
+    // setup PionGGElemField
+    const Geometry& geo = point_src_prop.geo;
+    PionGGElemField three_point_correlator_labeled_xp;
+    three_point_correlator_labeled_xp.init(geo);
+    set_zero(three_point_correlator_labeled_xp.field);
+
+    compute_three_point_correlator_ama_from_closest_wall_src_prop(point_src_coor, t_min, three_point_correlator_labeled_xp, point_src_prop, wall_src_list, exact_wall_src_list, exact_wall_t_list, sloppy_exact_ratio, pion);
+
+    // shift
+    PionGGElemField three_point_correlator_labeled_xp_shift;
+    field_shift(three_point_correlator_labeled_xp_shift, three_point_correlator_labeled_xp, -point_src_coor);
+
+    // save
+    const Coordinate new_geom(1, 1, 1, 8);
+    std::string field_out_coor_path = ensemble_info.get_field_traj_xg_path(traj, point_src_coor);
+    ensemble_info.make_field_traj_xg_dir(traj, point_src_coor);
+    dist_write_field(three_point_correlator_labeled_xp_shift, new_geom, field_out_coor_path);
+    sync_node();
+
+    count += 1;
+    main_displayln_info(ssprintf("Save PionGGElem Field to [%04d/%04d]: ", count, xg_list.size()) + field_out_coor_path);
+  }
+  qtouch_info(field_out_path + "/checkpoint");
+  return;
+}
+
 void compute_point_point_wall_correlator_ama_in_one_traj(const int t_min, const std::string& wall_src_path, const std::string& exact_wall_src_path, const std::string& gauge_transform_path, const double sloppy_exact_ratio, const std::string& point_src_path, const std::string& field_out_traj_path, const double pion, int type_)
 {
   TIMER_VERBOSE("compute_point_point_wall_correlator_ama_in_one_traj");
 
   qassert(does_file_exist_sync_node(field_out_traj_path));
-  const std::string field_out_tmin_path = field_out_traj_path + "/" + ssprintf("ama ; t-min=%04d", t_min);
+  const std::string field_out_tmin_path = field_out_traj_path + "/" + ssprintf("t-min=%04d", t_min);
   qmkdir_sync_node(field_out_tmin_path);
   if (does_file_exist_sync_node(field_out_tmin_path + "/checkpoint")){return;}
 
@@ -2055,20 +2607,6 @@ void compute_three_point_corr_model(PionGGElemField& three_point_correlator_labe
   return;
 }
 
-struct TwoPointWallEnsembleInfo {
-  std::string ENSEMBLE;
-  double PION;
-  std::string precision;
-
-  std::vector<int> traj_list;
-  int T_MIN;
-  std::string FIELD_PATH;
-
-  int num_wall_sloppy;
-  int num_wall_exact;
-  double WALL_SLOPPY_EXACT_RATIO;
-};
-
 void compute_f2_24D_sloppy_all_traj()
 {
   init_muon_line();
@@ -2207,9 +2745,9 @@ void compute_f2_24D_ama_all_traj()
     // read pgge
     PionGGElemField pgge_field_1;
     PionGGElemField pgge_field_2;
-    const std::string PGGE_FIELD_PATH_1 = "/projects/HadronicLight_4/ctu//hlbl/hlbl-pion/ThreePointCorrField/" + ENSEMBLE + ssprintf("/results=%04d/ama ; t-min=%04d", traj_list[i_pgge_1], TMIN);
+    const std::string PGGE_FIELD_PATH_1 = "/projects/HadronicLight_4/ctu//hlbl/hlbl-pion/ThreePointCorrField/" + ENSEMBLE + ssprintf("/results=%04d/t-min=%04d", traj_list[i_pgge_1], TMIN);
     read_pionggelemfield_without_accuracy_and_avg(pgge_field_1, PGGE_FIELD_PATH_1, TYPE);
-    const std::string PGGE_FIELD_PATH_2 = "/projects/HadronicLight_4/ctu//hlbl/hlbl-pion/ThreePointCorrField/" + ENSEMBLE + ssprintf("/results=%04d/ama ; t-min=%04d", traj_list[i_pgge_2], TMIN);
+    const std::string PGGE_FIELD_PATH_2 = "/projects/HadronicLight_4/ctu//hlbl/hlbl-pion/ThreePointCorrField/" + ENSEMBLE + ssprintf("/results=%04d/t-min=%04d", traj_list[i_pgge_2], TMIN);
     read_pionggelemfield_without_accuracy_and_avg(pgge_field_2, PGGE_FIELD_PATH_2, TYPE);
 
     // compute f2
@@ -2361,8 +2899,8 @@ void compute_f2_32D_ama_all_traj(const double XXP_LIMIT_, const int TMIN_, const
       // read pgge
       PionGGElemField pgge_field_1;
       PionGGElemField pgge_field_2;
-      const std::string PGGE_FIELD_PATH_1 = THREE_POINT_ENSEMBLE_PATH + ssprintf("/results=%04d/ama ; t-min=%04d", traj_list[i_pgge_1], TMIN);
-      const std::string PGGE_FIELD_PATH_2 = THREE_POINT_ENSEMBLE_PATH + ssprintf("/results=%04d/ama ; t-min=%04d", traj_list[i_pgge_2], TMIN);
+      const std::string PGGE_FIELD_PATH_1 = THREE_POINT_ENSEMBLE_PATH + ssprintf("/results=%04d/t-min=%04d", traj_list[i_pgge_1], TMIN);
+      const std::string PGGE_FIELD_PATH_2 = THREE_POINT_ENSEMBLE_PATH + ssprintf("/results=%04d/t-min=%04d", traj_list[i_pgge_2], TMIN);
       if (!does_file_exist_sync_node(PGGE_FIELD_PATH_1 + "/avg_checkpoint") or !does_file_exist_sync_node(PGGE_FIELD_PATH_2 + "/avg_checkpoint")){
         main_displayln_info(ssprintf("PionGG Field are not completed, %04d, %04d", traj_list[i_pgge_1], traj_list[i_pgge_2]));
         release_lock();
@@ -2440,11 +2978,25 @@ void compute_point_point_wall_correlator_sloppy_24D_all_traj()
 
 void compute_point_point_wall_correlator_ama_24D_all_traj()
 {
-  // prepare traj_list
-  // std::vector<int> traj_list = {1130};
-  // std::vector<int> traj_list = {1010, 1030, 1050, 1070, 1090, 1110, 1140, 1160, 1180, 1220, 1240, 1260, 1280, 1300, 1320, 1360, 1380, 1400, 1420, 1440, 1460, 1480, 1500, 1520, 1540, 1560, 1580, 1600, 1620, 1640, 1660, 1680, 1700, 1720, 1740, 1760, 1780, 1800, 1820, 1840, 1860, 1880, 1900, 1920, 1940, 1960, 1980, 2000, 2020, 2040, 2060, 2080, 2120, 2140, 2160, 2180, 2200, 2220, 2240, 2260, 2280};
-  // main_displayln_info(ssprintf("Num of Configurations: %d", traj_list.size()));
+  TwoPointWallEnsembleInfo ensemble_info_24d_ama("24D-0.00107", "ama");
+  ensemble_info_24d_ama.make_field_ensemble_accuracy_tmin_dir();
 
+  // for (int traj = 2280; traj >= 1000; traj -= 10)
+  for (int traj = 1900; traj >= 1900; traj -= 10)
+  {
+    ensemble_info_24d_ama.make_field_traj_dir(traj);
+    const std::string FIELD_OUT_FULL_PATH = ensemble_info_24d_ama.get_field_traj_dir(traj);
+
+    if (obtain_lock(FIELD_OUT_FULL_PATH + "-lock")) {
+      compute_point_point_wall_correlator_ama_in_one_traj(ensemble_info_24d_ama, traj);
+      // avg and remove
+      avg_pionggelemfield_without_accuracy_and_rm(FIELD_OUT_FULL_PATH, ensemble_info_24d_ama.TYPE);
+      release_lock();
+    }
+  }
+  exit(0);
+
+#if 0
   const std::string ENSEMBLE = "24D";
   const int T_MIN = 10;
   const std::string FIELD_OUT_ENSEMBLE_PATH = "ThreePointCorrField/24D/ama";
@@ -2491,7 +3043,7 @@ void compute_point_point_wall_correlator_ama_24D_all_traj()
 
     const std::string FIELD_OUT_TRAJ_PATH = FIELD_OUT_ENSEMBLE_PATH + "/" + ssprintf("results=%04d", traj_list[i]);
     qmkdir_sync_node(FIELD_OUT_TRAJ_PATH);
-    const std::string PGGE_FIELD_PATH = FIELD_OUT_ENSEMBLE_PATH + ssprintf("/results=%04d/ama ; t-min=%04d", traj_list[i], T_MIN);
+    const std::string PGGE_FIELD_PATH = FIELD_OUT_ENSEMBLE_PATH + ssprintf("/results=%04d/t-min=%04d", traj_list[i], T_MIN);
     if (does_file_exist_sync_node(PGGE_FIELD_PATH + "/avg_checkpoint")) {
       main_displayln_info("Avg PionGGElemField Has Already Completed In: " + PGGE_FIELD_PATH);
       continue;
@@ -2504,6 +3056,7 @@ void compute_point_point_wall_correlator_ama_24D_all_traj()
       release_lock();
     }
   }
+#endif
 }
 
 void compute_point_point_wall_correlator_sloppy_32D_all_traj()
@@ -2563,7 +3116,8 @@ void compute_point_point_wall_correlator_ama_32D_all_traj()
 {
   const std::string ENSEMBLE = "32D";
   const int T_MIN = 10;
-  const std::string FIELD_OUT_ENSEMBLE_PATH = "ThreePointCorrField/32D-0.00107/ama";
+  // const std::string FIELD_OUT_ENSEMBLE_PATH = "ThreePointCorrField/32D-0.00107/ama";
+  const std::string FIELD_OUT_ENSEMBLE_PATH = "TwoPointWallCorrField/32D-0.00107/ama";
   double PION = 0.139474;
   const int TYPE = 0;
   const int num_wall_sloppy = 64;
@@ -2571,8 +3125,8 @@ void compute_point_point_wall_correlator_ama_32D_all_traj()
   const double prob = 1. - std::pow(1. - 1. / (double) num_wall_sloppy, num_wall_exact);
   const double WALL_SLOPPY_EXACT_RATIO = 1. / prob;
 
-  qmkdir_sync_node("ThreePointCorrField");
-  qmkdir_sync_node("ThreePointCorrField/32D-0.00107");
+  qmkdir_sync_node("TwoPointWallCorrField");
+  qmkdir_sync_node("TwoPointWallCorrField/32D-0.00107");
   qmkdir_sync_node(FIELD_OUT_ENSEMBLE_PATH);
 
   main_displayln_info("ENSEMBLE: " + ENSEMBLE);
@@ -2618,7 +3172,7 @@ void compute_point_point_wall_correlator_ama_32D_all_traj()
 
     const std::string FIELD_OUT_TRAJ_PATH = FIELD_OUT_ENSEMBLE_PATH + "/" + ssprintf("results=%04d", traj_list[i]);
     qmkdir_sync_node(FIELD_OUT_TRAJ_PATH);
-    const std::string PGGE_FIELD_PATH = FIELD_OUT_ENSEMBLE_PATH + ssprintf("/results=%04d/ama ; t-min=%04d", traj_list[i], T_MIN);
+    const std::string PGGE_FIELD_PATH = FIELD_OUT_ENSEMBLE_PATH + ssprintf("/results=%04d/t-min=%04d", traj_list[i], T_MIN);
     if (does_file_exist_sync_node(PGGE_FIELD_PATH + "/avg_checkpoint")) {
       main_displayln_info("Avg PionGGElemField Has Already Completed In: " + PGGE_FIELD_PATH);
       continue;
@@ -2683,7 +3237,7 @@ void compute_point_point_wall_correlator_ama_48I_all_traj()
     compute_point_point_wall_correlator_ama_in_one_traj(T_MIN, WALL_SRC_PATH, EXACT_WALL_SRC_PATH, GAUGE_TRANSFORM_PATH, POINT_SRC_PATH, FIELD_OUT_TRAJ_PATH, PION, TYPE);
 
     // avg and remove
-    const std::string PGGE_FIELD_PATH = FIELD_OUT_ENSEMBLE_PATH + ssprintf("/results=%04d/ama ; t-min=%04d", traj_list[i], T_MIN);
+    const std::string PGGE_FIELD_PATH = FIELD_OUT_ENSEMBLE_PATH + ssprintf("/results=%04d/t-min=%04d", traj_list[i], T_MIN);
     avg_pionggelemfield_without_accuracy_and_rm(PGGE_FIELD_PATH, TYPE);
   }
 }
@@ -2860,13 +3414,13 @@ int main(int argc, char* argv[])
   // compute_wall_wall_correlator_all_traj_32D_sloppy();
 
   // compute_model();
-  // compute_point_point_wall_correlator_ama_24D_all_traj();
+  compute_point_point_wall_correlator_ama_24D_all_traj();
   // compute_f2_24D_ama_all_traj();
   // compute_point_point_wall_correlator_sloppy_24D_all_traj();
   // compute_f2_24D_sloppy_all_traj();
 
   // compute_point_point_wall_correlator_sloppy_32D_all_traj();
-  compute_point_point_wall_correlator_ama_32D_all_traj();
+  // compute_point_point_wall_correlator_ama_32D_all_traj();
   // int XXP_LIMIT = 10;
   // int TMIN = 10;
   // std::string MOD = "";
