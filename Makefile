@@ -3,7 +3,7 @@ SHELL=/bin/bash
 CC=mpicc -fopenmp -O2 -w
 CXX=mpic++ -std=c++0x -fopenmp -O2 -w
 
-qlat_prefix=$$HOME/qlat-build/1.0
+qlat_prefix=/home/tucheng/qlat-build/1.0
 
 QLAT_INCLUDE=$(qlat_prefix)/include
 QLAT_LIB=$(qlat_prefix)/lib
@@ -11,7 +11,7 @@ QLAT_LIB=$(qlat_prefix)/lib
 QLAT_CFLAGS=-fno-strict-aliasing -DEIGEN_DONT_ALIGN_STATICALLY
 QLAT_CFLAGS+= -I$(QLAT_INCLUDE)
 QLAT_CFLAGS+= -I$(QLAT_INCLUDE)/eigen3
-QLAT_CFLAGS+= -I$(QLAT_INCLUDE)/utils
+QLAT_CFLAGS+= -I$(QLAT_INCLUDE)/qutils
 QLAT_CFLAGS+= -I./cuba-cooley
 
 QLAT_CXXFLAGS=$(QLAT_CFLAGS)
@@ -29,7 +29,8 @@ run: hlbl-pi.x
 	make clean
 
 hlbl-pi.x: *.C
-	. $(qlat_prefix)/setenv.sh ; time make build
+	# . $(qlat_prefix)/setenv.sh ;
+	time make build
 	[ -f $@ ]
 
 build:

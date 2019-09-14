@@ -10,6 +10,12 @@
 
 #include <cassert>
 
+using namespace qlat;
+
+#define qtimer qlat
+#define qshow qlat
+#define qrngstate qlat
+
 template <class F>
 void rootFSolver(
     double& result, double& abserr,
@@ -47,5 +53,5 @@ inline void test_rootFSolver()
   TIMER_VERBOSE("test_rootFSolver");
   test_Functor f;
   f.scale = std::sqrt(3.0);
-  qtimer::DisplayInfo("", fname, "%23.16e = %23.16e\n", 1.3467736870885985, rootFSolver(f, 1.0, 0.1, 1.8));
+  qlat::DisplayInfo("", fname, "%23.16e = %23.16e\n", 1.3467736870885985, rootFSolver(f, 1.0, 0.1, 1.8));
 }

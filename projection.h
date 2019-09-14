@@ -148,7 +148,7 @@ inline MagneticMoment computeProjection(
     gammas[i] = smc.gammas[i];
   }
   gammas[4] = gammas[3] + unit;
-  SpinMatrix proj = 0.5 * (unit + gammas[3]); // proj = (1 + gamma_0) / 2
+  SpinMatrix proj = (Complex)0.5 * (unit + gammas[3]); // proj = (1 + gamma_0) / 2
   SpinMatrix magMat;
   set_zero(magMat);
   for (int i = 0; i < 5; ++i) {
@@ -213,7 +213,7 @@ inline std::string showMagneticMoment(const MagneticMoment& mm)
 inline std::string showManyMagneticMoments(const ManyMagneticMoments& mmm)
 {
   using namespace qlat;
-  const double sqrt_norm = std::sqrt(norm(mmm));
+  const double sqrt_norm = std::sqrt(qnorm(mmm));
   std::ostringstream out;
   out << "norm = " << show(sqrt_norm) << std::endl;
   for (int nu = 0; nu < 4; ++nu) {
@@ -221,7 +221,7 @@ inline std::string showManyMagneticMoments(const ManyMagneticMoments& mmm)
       for (int mu = 0; mu < 4; ++mu) {
         const MagneticMoment& mm = mmm[nu*16 + rho * 4 + mu];
         out << show(nu) + show(rho) + show(mu) << " "
-          << ssprintf("%9.6f", std::sqrt(norm(mm)) / sqrt_norm) << " "
+          << ssprintf("%9.6f", std::sqrt(qnorm(mm)) / sqrt_norm) << " "
           << showMagneticMoment((1.0/sqrt_norm) * mm)
           << std::endl;
       }
@@ -261,7 +261,7 @@ inline void test_projection()
   const SpinMatrix& unit = smc.unit;
   const std::array<SpinMatrix, 4>& gammas = smc.gammas;
   const std::array<SpinMatrix, 3>& cap_sigmas = smc.cap_sigmas;
-  SpinMatrix proj = 0.5 * (unit + gammas[3]); // proj = (1 + gamma_0) / 2
+  SpinMatrix proj = (Complex)0.5 * (unit + gammas[3]); // proj = (1 + gamma_0) / 2
   displayln_info(shows(0.5 * matrix_trace(proj * cap_sigmas[1] * proj * cap_sigmas[1])));
   std::vector<double> integral(25);
   set_zero(integral);

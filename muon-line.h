@@ -298,7 +298,7 @@ inline void paramsFromCoordinates(std::vector<double>& params, const qlat::Coord
   params[2] = std::acos(cos_theta) / PI;
   params[3] = std::acos(cos_phi) / PI;
   params[4] = std::acos(cos_eta) / PI;
-  if (std::isnan(params)) {
+  if (qisnan(params)) {
     displayln(shows("paramsFromCoordinates ") + show(x));
     displayln(shows("paramsFromCoordinates ") + show(y));
     displayln(shows("paramsFromCoordinates ") + show(params));
@@ -367,9 +367,9 @@ inline ManyMagneticMomentsCompressed muonLineSymParamsCompressed(const std::vect
   CoordinateD x, y;
   coordinatesFromParams(x, y, params);
   const ManyMagneticMoments mmm = muonLineSym(x, y, epsabs, epsrel);
-  assert(false == isnan(mmm));
+  assert(false == qisnan(mmm));
   const ManyMagneticMomentsCompressed ret = compressManyMagneticMoments(mmm);
-  const double mmm_len = std::sqrt(norm(ret));
+  const double mmm_len = std::sqrt(qnorm(ret));
   return compressManyMagneticMoments(mmm);
 }
 
@@ -592,23 +592,23 @@ inline void compare_many_magnetic_moments(const std::string& tag,
   using namespace qlat;
   std::vector<double> params;
   paramsFromCoordinatesPermute(params, x, y);
-  const double diff_percent = 100.0*sqrt(norm(mmmp-mmm) / norm(mmm));
+  const double diff_percent = 100.0*sqrt(qnorm(mmmp-mmm) / qnorm(mmm));
   const bool is_print = diff_percent > 0.0001 || true;
   if (is_print) {
 #pragma omp critical
     {
       displayln(compare_multiline_string(showManyMagneticMoments(mmm), showManyMagneticMoments(mmmp), 48));
       displayln(tag + ": " + ssprintf("CHECKING: %10.2e %10.2e %10.4f%%",
-            sqrt(norm(mmm)), sqrt(norm(mmmp-mmm)), diff_percent));
+            sqrt(qnorm(mmm)), sqrt(qnorm(mmmp-mmm)), diff_percent));
       displayln(tag + ": " + shows("params= ") + show(params));
       displayln(tag + ": " + ssprintf(" x  = %8.4f %s", coordinate_len(x) , show(x).c_str()));
       displayln(tag + ": " + ssprintf(" y  = %8.4f %s", coordinate_len(y) , show(y).c_str()));
       displayln(tag + ": " + ssprintf("y-x = %8.4f %s", coordinate_len(y-x) , show(y-x).c_str()));
-      displayln(tag + ": " + ssprintf("x  y  ") + show(sqrt(norm(mmm))));
+      displayln(tag + ": " + ssprintf("x  y  ") + show(sqrt(qnorm(mmm))));
       displayln(tag + ": " +
           ssprintf("DATA: %24.17E %24.17E %24.17E %24.17E %24.17E   %24.17E %24.17E %24.17E  %24.17E",
             params[0], params[1], params[2], params[3], params[4],
-            sqrt(norm(mmm)), sqrt(norm(mmmp)), sqrt(norm(mmmp-mmm)), sqrt(norm(mmmp-mmm)/norm(mmm))));
+            sqrt(qnorm(mmm)), sqrt(qnorm(mmmp)), sqrt(qnorm(mmmp-mmm)), sqrt(qnorm(mmmp-mmm)/qnorm(mmm))));
     }
   }
 }
