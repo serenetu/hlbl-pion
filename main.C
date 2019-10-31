@@ -7,15 +7,30 @@
 #include <math.h>
 #include <dirent.h>
 #include "muon-line.h"
+#include "my-utils.h"
+#include "f2.h"
+#include "wallwall.h"
+#include "point-point-wall.h"
+#include "piongg.h"
 
 #include <map>
 #include <vector>
 
 #define TEST 0
 
-double AINV = 1.015;
+// double AINV = 1.015;
 QLAT_START_NAMESPACE
 
+#if 0
+const SpinMatrix& gamma5 = SpinMatrixConstants::get_gamma5();
+const std::array<SpinMatrix,4>& gammas = SpinMatrixConstants::get_cps_gammas();
+const CoordinateD CoorD_0 = CoordinateD(0, 0, 0, 0);
+const Coordinate Coor_0 = Coordinate(0, 0, 0, 0);
+// const int NUM_RMAX = 80;
+// const int NUM_RMIN = 40;
+#endif
+
+#if 0
 inline std::string showWilsonMatrix(const WilsonMatrix& mat,
                                         bool human_readable = false)
 {
@@ -39,13 +54,6 @@ inline std::string showWilsonMatrix(const WilsonMatrix& mat,
   }
   return out.str();
 }
-
-const SpinMatrix& gamma5 = SpinMatrixConstants::get_gamma5();
-const std::array<SpinMatrix,4>& gammas = SpinMatrixConstants::get_cps_gammas();
-const CoordinateD CoorD_0 = CoordinateD(0, 0, 0, 0);
-const Coordinate Coor_0 = Coordinate(0, 0, 0, 0);
-const int NUM_RMAX = 80;
-const int NUM_RMIN = 40;
 
 void main_displayln_info(const std::string str) {
   const std::string out_str = "main:: " + str;
@@ -99,7 +107,9 @@ struct RotationMatrix
     mult_4d_matrix(matrix, rot_zt, matrix_);
   }
 };
+#endif
 
+#if 0
 template <class M>
 void write_data_from_0_node(const M& data, std::string path)
 {
@@ -125,7 +135,9 @@ void write_data_from_0_node(const M* data, const int size, std::string path)
   }
   sync_node();
 }
+#endif
 
+#if 0
 inline void string_split_acc(std::vector<std::string>& acc, const std::string& str, const std::string& sep)
 {
   long pos = 0;
@@ -244,7 +256,9 @@ std::vector<std::string> list_folders_under_path(const std::string& path_, const
   sync_node();
   return res;
 }
+#endif
 
+#if 0
 double r_coor(const Coordinate& coor)
 {
   return sqrt(sqr((long)coor[0]) + sqr((long)coor[1]) + sqr((long)coor[2]) + sqr((long)coor[3]));
@@ -254,13 +268,17 @@ double r_coorD(const CoordinateD& coor)
 {
   return sqrt(sqr((double)coor[0]) + sqr((double)coor[1]) + sqr((double)coor[2]) + sqr((double)coor[3]));
 }
+#endif
 
+#if 0
 template <class T>
 inline void set_zero(T& x)
 {
   memset(&x, 0, sizeof(T));
 }
+#endif
 
+#if 0
 double pion_prop(const qlat::CoordinateD& x, const qlat::CoordinateD& y, const double& m)
 // x, y and m must be in lattice unit
 {
@@ -315,7 +333,9 @@ inline std::string show_coordinateD(const CoordinateD& c)
 {
   return ssprintf("(%f,%f,%f,%f)", c[0], c[1], c[2], c[3]);
 }
+#endif
 
+#if 0
 typedef Cache<std::string, Propagator4d> PropCache;
 
 inline PropCache& get_prop_cache()
@@ -358,7 +378,9 @@ const Propagator4d& get_point_prop(const std::string& path, const Coordinate& c)
 {
   return get_prop(path + "/xg=" + show_coordinate(c) + " ; type=0 ; accuracy=0");
 }
+#endif
 
+#if 0
 // pion g g
 struct PionGGElem
 {
@@ -407,6 +429,7 @@ struct PionGGElem
     return *this;
   }
 };
+#endif
 
 #if 0
 struct WallWallField : FieldM<Complex,1>
@@ -451,6 +474,7 @@ struct WallWallField : FieldM<Complex,1>
 };
 #endif
 
+#if 0
 struct PionGGElemField : FieldM<PionGGElem,1>
 {
   virtual const std::string& cname()
@@ -501,7 +525,9 @@ inline std::string show_pgge(const PionGGElem& pgge)
   }
   return out;
 }
+#endif
 
+#if 0
 PionGGElem operator*(const RotationMatrix& rot, const PionGGElem& p)
 {
   PionGGElem resp;
@@ -546,7 +572,9 @@ CoordinateD operator*(const RotationMatrix& rot, const CoordinateD& coor)
   }
   return res;
 }
+#endif
 
+#if 0
 PionGGElem operator*(const Complex& x, const PionGGElem& p)
 {
   PionGGElem res;
@@ -639,7 +667,9 @@ PionGGElem operator*(const PionGGElem& x, const ManyMagneticMoments& mmm)
   }
   return res;
 }
+#endif
 
+#if 0
 std::vector<Complex> operator+(const std::vector<Complex>& v1, const std::vector<Complex>& v2)
 {
   qassert(v1.size() == v2.size())
@@ -662,7 +692,9 @@ std::vector<Complex> operator/(const std::vector<Complex>& v1, const Complex a)
   }
   return res;
 }
+#endif
 
+#if 0
 inline std::string show_mmm(const ManyMagneticMoments& mmm)
 {
   std::string out("");
@@ -675,18 +707,24 @@ inline std::string show_mmm(const ManyMagneticMoments& mmm)
   }
   return out;
 }
+#endif
 
+#if 0
 struct PionGG
 {
   Coordinate mom;
   std::vector<PionGGElem> table;
 };
+#endif
 
+#if 0
 Complex pi_pi_contraction(const WilsonMatrix& wm_from_1_to_2, const WilsonMatrix& wm_from_2_to_1)
 {
   return -matrix_trace((SpinMatrix)(ii * gamma5) * (WilsonMatrix)(wm_from_2_to_1 * (SpinMatrix)(ii * gamma5) * wm_from_1_to_2));
 }
+#endif
 
+#if 0
 void three_prop_contraction(PionGGElem& pgge, const WilsonMatrix& wm_21, const WilsonMatrix& wm_32, const WilsonMatrix& wm_13)
   // 1(mu) --wm_21--> 2(5) --wm_32--> 3(nu) --wm_13--> 1(mu)
   // need additional minus sign from the loop
@@ -718,6 +756,7 @@ void three_prop_contraction_(PionGGElem& pgge, const WilsonMatrix& wm_21, const 
     }
   }
 }
+#endif
 
 #if 0
 bool is_under_limit(const Coordinate& x, const Coordinate& y, const double& r)
@@ -739,16 +778,43 @@ int get_r_persent(Coordinate& vec1, Coordinate& vec2)
 }
 #endif
 
+#if 0
 struct BM_TABLE
 {
-  PionGGElem bm[NUM_RMAX][NUM_RMIN];
+  // PionGGElem bm[NUM_RMAX][NUM_RMIN];
+  std::vector<std::vector<PionGGElem>> bm;
+  BM_TABLE(int r_max, int r_min) {
+    bm.resize(r_max);
+    for (int row = 0; row < r_max; ++row) {
+      bm[row].resize(r_min);
+    }
+  }
+
+  void set_zero() {
+#pragma omp parallel for
+    for (int row = 0; row < bm.size(); ++row) {
+      for (int col = 0; col < bm[row].size(); ++col) {
+        qlat::set_zero(bm[row][col]);
+      }
+    }
+  }
+
+  void glb_sum_double() {
+    for (int row = 0; row < bm.size(); ++row) {
+      for (int col = 0; col < bm[row].size(); ++col) {
+        qlat::glb_sum_double(bm[row][col]);
+      }
+    }
+  }
 };
 
 void partialsum_bmtable(BM_TABLE& bm_table)
 {
-  for (int r_max = 0; r_max < NUM_RMAX; ++r_max)
+  int num_rmax = bm_table.bm.size();
+  int num_rmin = bm_table.bm[0].size();
+  for (int r_max = 0; r_max < num_rmax; ++r_max)
   {
-    for (int r_min = 0; r_min < NUM_RMIN; ++r_min)
+    for (int r_min = 0; r_min < num_rmin; ++r_min)
     {
       if (r_max == 0 && r_min == 0)
       {
@@ -792,7 +858,9 @@ XB operator+(const XB& xb1, const XB& xb2)
   }
   return res;
 }
+#endif
 
+#if 0
 struct XB_TABLE
 {
   XB xb_e[NUM_RMIN];
@@ -806,18 +874,40 @@ void partialsum_xbtable(XB_TABLE& xb_table)
   }
   return;
 }
+#endif
 
+#if 0
 struct Complex_Table
 {
-  Complex c[NUM_RMAX][NUM_RMIN];
+  // Complex c[NUM_RMAX][NUM_RMIN];
+  std::vector<std::vector<Complex>> c;
 
-  Complex_Table& operator*(const Complex& c)
-  {
+  Complex_Table (int r_max, int r_min) {
+    c.resize(r_max);
+    for (int row = 0; row < r_max; ++row) {
+      c[row].resize(r_min);
+    }
+  }
+
+  void set_zero() {
 #pragma omp parallel for
-    for (int rmax = 0; rmax < NUM_RMAX; ++rmax) {
-      for (int rmin = 0; rmin < NUM_RMIN; ++rmin) {
+    for (int row = 0; row < c.size(); ++row) {
+      for (int col = 0; col < c[row].size(); ++col) {
+        qlat::set_zero(c[row][col]);
+      }
+    }
+  }
+
+  Complex_Table& operator*(const Complex& complex_val)
+  {
+    int num_rmax = c.size();
+    int num_rmin = c[0].size();
+
+#pragma omp parallel for
+    for (int rmax = 0; rmax < num_rmax; ++rmax) {
+      for (int rmin = 0; rmin < num_rmin; ++rmin) {
         Complex& e = this -> c[rmax][rmin];
-        e *= c;
+        e *= complex_val;
       }
     }
     return *this;
@@ -825,9 +915,12 @@ struct Complex_Table
 
   Complex_Table& operator+=(const Complex_Table& other)
   {
+    int num_rmax = c.size();
+    int num_rmin = c[0].size();
+    qassert(num_rmax == other.c.size() && num_rmin == other.c[0].size());
 #pragma omp parallel for
-    for (int rmax = 0; rmax < NUM_RMAX; ++rmax) {
-      for (int rmin = 0; rmin < NUM_RMIN; ++rmin) {
+    for (int rmax = 0; rmax < num_rmax; ++rmax) {
+      for (int rmin = 0; rmin < num_rmin; ++rmin) {
         this -> c[rmax][rmin] += other.c[rmax][rmin];
       }
     }
@@ -835,16 +928,18 @@ struct Complex_Table
   }
 };
 
-Complex_Table operator*(const Complex& c, const Complex_Table& table)
+Complex_Table operator*(const Complex& complex_val, const Complex_Table& table)
 {
-  Complex_Table res;
-  set_zero(res);
+  int num_rmax = table.c.size();
+  int num_rmin = table.c[0].size();
+  Complex_Table res(num_rmax, num_rmin);
+  res.set_zero();
 #pragma omp parallel for
-  for (int rmax = 0; rmax < NUM_RMAX; ++rmax) {
-    for (int rmin = 0; rmin < NUM_RMIN; ++rmin) {
+  for (int rmax = 0; rmax < num_rmax; ++rmax) {
+    for (int rmin = 0; rmin < num_rmin; ++rmin) {
       const Complex& e = table.c[rmax][rmin];
       Complex& r = res.c[rmax][rmin];
-      r = c * e;
+      r = complex_val * e;
     }
   }
   return res;
@@ -852,10 +947,12 @@ Complex_Table operator*(const Complex& c, const Complex_Table& table)
 
 std::string show_complex_table(const Complex_Table& complex_table)
 {
+  int num_rmax = complex_table.c.size();
+  int num_rmin = complex_table.c[0].size();
   std::string res = "";
-  for (int rmax = 0; rmax < NUM_RMAX; ++rmax)
+  for (int rmax = 0; rmax < num_rmax; ++rmax)
   {
-    for (int rmin = 0; rmin < NUM_RMIN; ++rmin)
+    for (int rmin = 0; rmin < num_rmin; ++rmin)
     {
       res += ssprintf("%24.17e %24.17e, ", (complex_table.c[rmax][rmin]).real(), (complex_table.c[rmax][rmin]).imag());
     }
@@ -863,7 +960,9 @@ std::string show_complex_table(const Complex_Table& complex_table)
   }
   return res;
 }
+#endif
 
+#if 0
 struct Y_And_Rotation_Info_Elem
 {
   double dist;
@@ -968,7 +1067,9 @@ struct YAndRotationInfo
     return info_sub_list;
   }
 };
+#endif
 
+#if 0
 double f_r(double r, double fpi, double mv)
 {
     double fte;
@@ -979,7 +1080,9 @@ double f_r(double r, double fpi, double mv)
 
     return 8. * std::pow(PI, 2.) * std::pow(fpi, 2.) / (3. * std::pow(mv, 2.)) * fte + (1. - 8. * std::pow(PI, 2.) * std::pow(fpi, 2.) / (3. * std::pow(mv, 2.))) * fvmd;
 }
+#endif
 
+#if 0
 void b_model(PionGGElem& pgge, const CoordinateD& x_xp, const CoordinateD& xp_x_mid_z, const double& pion)
 {
     set_zero(pgge);
@@ -1047,16 +1150,17 @@ void b_model(PionGGElem& pgge, const CoordinateD& x_xp, const CoordinateD& xp_x_
     pgge = - ii * fpi * std::pow(pion, 2.) / (12. * std::pow(PI, 4.) * std::pow(r_x_xp, 4.) * std::pow(r_xp_x_mid_z, 2.)) * f_r(r_x_xp, fpi, mv) * gsl_sf_bessel_Kn(2, xz_mass) * pgge;
     return;
 }
+#endif
 
+#if 0
 void find_bm_table_rotation_pgge(BM_TABLE& bm_table, const PionGGElemField& pgge_field, const CoordinateD& y_large, const RotationMatrix rot, const double& muon, const std::string mod="")
 // bm_table is initialized in this func
 {
   TIMER_VERBOSE("find_bm_table_rotation_pgge");
   qassert(mod == "xy>=xyp" or mod == "xyp>=xy" or mod == "");
-  set_zero(bm_table);
+  bm_table.set_zero();
   const Geometry& geo = pgge_field.geo;
   const Coordinate total_site = geo.total_site();
-  // const RotationMatrix rot180(PI, 0., 0.);
   Coordinate y  = Coordinate(0,0,0,0);
   
   double r_y_large = r_coorD(y_large);
@@ -1070,7 +1174,6 @@ void find_bm_table_rotation_pgge(BM_TABLE& bm_table, const PionGGElemField& pgge
 
     // find coor info
     CoordinateD yp_y = relative_coordinate(yp-y, total_site);
-    // CoordinateD yp_y_rot = rot * (rot180 * yp_y);
     CoordinateD yp_y_rot = rot * yp_y;
     const CoordinateD yp_large = y_large + yp_y_rot;
     const CoordinateD muon_yp_large = muon * CoordinateD(yp_large);
@@ -1091,13 +1194,15 @@ void find_bm_table_rotation_pgge(BM_TABLE& bm_table, const PionGGElemField& pgge
     r_max = int(ceil(std::max(double(r_max), r_yp_y)));
     int r_min = int(ceil(std::min(r_y_large, r_yp_large)));
     r_min = int(ceil(std::min(double(r_min), r_yp_y)));
-    if (r_max >= NUM_RMAX || r_min >= NUM_RMIN) {continue; }
+
+    int num_rmax = bm_table.bm.size();
+    int num_rmin = bm_table.bm[0].size();
+    if (r_max >= num_rmax || r_min >= num_rmin) {continue; }
 
     PionGGElem& bm = bm_table.bm[r_max][r_min];
 
     PionGGElem pgge;
     set_zero(pgge);
-    // pgge = rot * (rot180 * pgge_field.get_elem(lyp));
     pgge = rot * pgge_field.get_elem(lyp);
 
     if ((mod == "") || ((mod != "") && (std::abs(r_y_large - r_yp_large) < std::pow(10., -10.)))) {
@@ -1106,7 +1211,7 @@ void find_bm_table_rotation_pgge(BM_TABLE& bm_table, const PionGGElemField& pgge
       bm += 2. * (pgge * mmm);
     }
   }
-  glb_sum_double(bm_table);
+  bm_table.glb_sum_double();
   return;
 }
 
@@ -1163,17 +1268,22 @@ Complex find_e_xbbm(const XB& xb, const PionGGElem& bm)
 void find_e_xbbm_table(Complex_Table& e_xbbm_table, const XB& xb, const BM_TABLE& bm_table)
 {
   TIMER_VERBOSE("find_e_xbbm_table");
-  set_zero(e_xbbm_table);
+  e_xbbm_table.set_zero();
+  int num_rmax = e_xbbm_table.c.size();
+  int num_rmin = e_xbbm_table.c[0].size();
+  qassert(num_rmax == bm_table.bm.size() && num_rmax == bm_table.bm[0].size());
 #pragma omp parallel for
-  for (int rmax = 0; rmax < NUM_RMAX; ++rmax) {
-    for (int rmin = 0; rmin < NUM_RMIN; ++rmin) {
+  for (int rmax = 0; rmax < num_rmax; ++rmax) {
+    for (int rmin = 0; rmin < num_rmin; ++rmin) {
       const PionGGElem& bm = bm_table.bm[rmax][rmin];
       Complex& e_xbbm = e_xbbm_table.c[rmax][rmin];
       e_xbbm = find_e_xbbm(xb, bm);
     }
   }
 }
+#endif
 
+#if 0
 inline std::string get_point_src_props_path(const std::string& job_tag,
                                             const int traj)
 {
@@ -1429,7 +1539,9 @@ inline std::string get_wall_src_prop_exact_path(const std::string& job_tag, cons
   }
   return "";
 }
+#endif
 
+#if 0
 inline int get_tmin(const std::string& job_tag)
 {
   if (job_tag == "24D-0.00107" or job_tag == "32D-0.00107") {
@@ -1508,7 +1620,9 @@ struct EnsembleInfo {
     show_info();
   }
 };
+#endif
 
+#if 0
 struct WallWallEnsembleInfo : public EnsembleInfo {
   std::string ACCURACY;
 
@@ -1583,7 +1697,9 @@ struct WallWallEnsembleInfo : public EnsembleInfo {
     qmkdir_sync_node(CORR_OUT_PATH + "/" + ENSEMBLE + "/" + ACCURACY);
   }
 };
+#endif
 
+#if 0
 struct TwoPointWallEnsembleInfo : public EnsembleInfo{
   std::string ACCURACY;
   int T_MIN;
@@ -1831,7 +1947,9 @@ struct TwoPointWallEnsembleInfo : public EnsembleInfo{
     return count;
   }
 };
+#endif
 
+#if 0
 struct F2EnsembleInfo : public EnsembleInfo, public YAndRotationInfo{
   int T_MIN;
   int TYPE = 0;
@@ -1847,6 +1965,9 @@ struct F2EnsembleInfo : public EnsembleInfo, public YAndRotationInfo{
   std::string TRAJ_PAIRS_FILE_PATH;
   int TRAJ_JUMP;
 
+  int NUM_RMAX;
+  int NUM_RMIN;
+
   void init(const std::string& accuracy_, const std::string& mod_, const int xxp_limit) {
     ACCURACY = accuracy_;
     qassert(ACCURACY == "ama" || ACCURACY == "sloppy");
@@ -1857,14 +1978,24 @@ struct F2EnsembleInfo : public EnsembleInfo, public YAndRotationInfo{
     T_MIN = get_tmin(ENSEMBLE);
     if (ENSEMBLE == "24D-0.00107") {
       TRAJ_JUMP = 50;
+      NUM_RMAX = 80;
+      NUM_RMIN = 40;
     } else if (ENSEMBLE == "24D-0.0174") {
       TRAJ_JUMP = 50;
+      NUM_RMAX = 80;
+      NUM_RMIN = 40;
     } else if (ENSEMBLE == "32D-0.00107") {
       TRAJ_JUMP = 50;
+      NUM_RMAX = 80;
+      NUM_RMIN = 40;
     } else if (ENSEMBLE == "32Dfine-0.0001") {
       TRAJ_JUMP = 50;
+      NUM_RMAX = 100;
+      NUM_RMIN = 40;
     } else if (ENSEMBLE == "48I-0.00078") {
       TRAJ_JUMP = 60;
+      NUM_RMAX = 120;
+      NUM_RMIN = 60;
     } else {
       qassert(false);
     }
@@ -1882,8 +2013,10 @@ struct F2EnsembleInfo : public EnsembleInfo, public YAndRotationInfo{
     main_displayln_info("F2_ENSEMBLE_PATH: " + F2_ENSEMBLE_PATH);
 
     main_displayln_info("TRAJ_PAIRS_FILE_PATH: " + TRAJ_PAIRS_FILE_PATH);
-
     main_displayln_info(ssprintf("TRAJ_JUMP: %d", TRAJ_JUMP));
+
+    main_displayln_info(ssprintf("NUM_RMAX: %d", NUM_RMAX));
+    main_displayln_info(ssprintf("NUM_RMIN: %d", NUM_RMIN));
   }
 
   F2EnsembleInfo(const std::string& ensemble_, const std::string& accuracy_, const std::string& mod_, const int xxp_limit) : EnsembleInfo(ensemble_), YAndRotationInfo(ensemble_) {
@@ -1952,12 +2085,21 @@ struct F2EnsembleInfo : public EnsembleInfo, public YAndRotationInfo{
     return traj_pair_list;
   }
 };
+#endif
 
 QLAT_END_NAMESPACE
 
 using namespace qlat;
 
-Complex_Table find_onepair_f2_table_rotation_pgge(const PionGGElemField& pgge_field_1, const PionGGElemField& pgge_field_2, const Y_And_Rotation_Info_Elem& onepair, const int xxp_limit, const double& muon, const double& pion, const std::string& mod="")
+#if 0
+Complex_Table find_onepair_f2_table_rotation_pgge(
+    const PionGGElemField& pgge_field_1, 
+    const PionGGElemField& pgge_field_2, 
+    const Y_And_Rotation_Info_Elem& onepair, 
+    const int xxp_limit, 
+    const double& muon, 
+    const double& pion, 
+    const std::string& mod="")
 {
   TIMER_VERBOSE("find_onepair_f2_table_rotation_pgge");
   const Geometry& geo = pgge_field_1.geo;
@@ -1980,12 +2122,12 @@ Complex_Table find_onepair_f2_table_rotation_pgge(const PionGGElemField& pgge_fi
 
   // bm_table
   BM_TABLE bm_table;
-  set_zero(bm_table);
+  bm_table.set_zero();
   find_bm_table_rotation_pgge(bm_table, pgge_field_2, y_large, rotation_matrix, muon, mod);
 
   // e_xbbm_table
   Complex_Table e_xbbm_table;
-  set_zero(e_xbbm_table);
+  e_xbbm_table.set_zero();
   find_e_xbbm_table(e_xbbm_table, xb, bm_table);
 
   // prop
@@ -2003,8 +2145,14 @@ Complex_Table find_onepair_f2_table_rotation_pgge(const PionGGElemField& pgge_fi
 
   return e_xbbm_table;
 }
+#endif
 
-Complex_Table find_one_y_f2_table_rotation_pgge(const F2EnsembleInfo& f2_ensemble_info, const Y_And_Rotation_Info_Elem& one_y, const PionGGElemField& pgge_field_1, const PionGGElemField& pgge_field_2)
+#if 0
+Complex_Table find_one_y_f2_table_rotation_pgge(
+    const F2EnsembleInfo& f2_ensemble_info, 
+    const Y_And_Rotation_Info_Elem& one_y, 
+    const PionGGElemField& pgge_field_1, 
+    const PionGGElemField& pgge_field_2)
 {
   TIMER_VERBOSE("find_one_y_f2_table_rotation_pgge");
   const Geometry& geo = pgge_field_1.geo;
@@ -2015,6 +2163,9 @@ Complex_Table find_one_y_f2_table_rotation_pgge(const F2EnsembleInfo& f2_ensembl
   const double pion = f2_ensemble_info.PION;
   const int xxp_limit = f2_ensemble_info.XXP_LIMIT;
   const std::string mod = f2_ensemble_info.MOD;
+
+  const int num_rmax = f2_ensemble_info.NUM_RMAX;
+  const int num_rmin = f2_ensemble_info.NUM_RMIN;
 
   const double theta_xy = one_y.theta_xy;
   const double theta_xt = one_y.theta_xt;
@@ -2030,13 +2181,13 @@ Complex_Table find_one_y_f2_table_rotation_pgge(const F2EnsembleInfo& f2_ensembl
   find_xb_rotation_pgge(xb, pgge_field_1, rotation_matrix, xb_limit);
 
   // bm_table
-  BM_TABLE bm_table;
-  set_zero(bm_table);
+  BM_TABLE bm_table(num_rmax, num_rmin);
+  bm_table.set_zero();
   find_bm_table_rotation_pgge(bm_table, pgge_field_2, y_large, rotation_matrix, muon, mod);
 
   // e_xbbm_table
-  Complex_Table e_xbbm_table;
-  set_zero(e_xbbm_table);
+  Complex_Table e_xbbm_table(num_rmax, num_rmin);
+  e_xbbm_table.set_zero();
   find_e_xbbm_table(e_xbbm_table, xb, bm_table);
 
   // prop
@@ -2054,6 +2205,7 @@ Complex_Table find_one_y_f2_table_rotation_pgge(const F2EnsembleInfo& f2_ensembl
 
   return e_xbbm_table;
 }
+#endif
 
 #if 0
 Complex_Table avg_f2_table_from_three_point_corr_from_y_and_rotation_info(std::string f_pairs, const PionGGElemField& pgge_field, const double& xxp_limit, const double& muon, const double& pion)
@@ -2109,14 +2261,22 @@ Complex_Table avg_f2_table_from_three_point_corr_from_y_and_rotation_info(std::v
 }
 #endif
 
-Complex_Table compute_f2_one_traj_pair_and_save(const std::vector<int>& traj_pair, const F2EnsembleInfo& f2_ensemble_info, const std::vector<Y_And_Rotation_Info_Elem>& y_info, const PionGGElemField& pgge_field_1, const PionGGElemField& pgge_field_2)
+#if 0
+Complex_Table compute_f2_one_traj_pair_and_save(
+    const std::vector<int>& traj_pair, 
+    const F2EnsembleInfo& f2_ensemble_info, 
+    const std::vector<Y_And_Rotation_Info_Elem>& y_info, 
+    const PionGGElemField& pgge_field_1, 
+    const PionGGElemField& pgge_field_2)
 {
   TIMER_VERBOSE("compute_f2_one_traj_pair_and_save");
   qassert(traj_pair.size() == 2);
   main_displayln_info(fname + ssprintf(": Compute f2 From Traj Pair: %04d, %04d", traj_pair[0], traj_pair[1]));
   f2_ensemble_info.make_traj_pair_dir(traj_pair);
-  Complex_Table f2_table;
-  set_zero(f2_table);
+  const int num_rmax = f2_ensemble_info.NUM_RMAX;
+  const int num_rmin = f2_ensemble_info.NUM_RMIN;
+  Complex_Table f2_table(num_rmax, num_rmin);
+  f2_table.set_zero();
   for (int i = 0; i < y_info.size(); ++i)
   {
     // check
@@ -2141,6 +2301,7 @@ Complex_Table compute_f2_one_traj_pair_and_save(const std::vector<int>& traj_pai
   main_displayln_info(show_complex_table(f2_table));
   return f2_table;
 }
+#endif
 
 #if 0
 void compute_three_point_correlator_from_wall_src_prop(PionGGElemField& three_point_correlator_labeled_xp, const Propagator4d& point_src_prop, const Propagator4d& wall_src_prop)
@@ -2184,6 +2345,7 @@ void compute_three_point_correlator_from_wall_src_prop(PionGGElemField& three_po
 }
 #endif
 
+#if 0
 void compute_three_point_correlator_from_closest_wall_src_prop(const Coordinate& x, const int t_min, PionGGElemField& three_point_correlator_labeled_xp, const Propagator4d& point_src_prop, const std::vector<Propagator4d>& wall_src_list, const double pion)
 // three_point_correlator_labeled_xp(xp)[mu][nu] =
 //   Tr(S(x, wall) * ii * gamma5 * S(wall, xp) * gamma_nu * S(xp, x) * gamma_mu) / exp(-pion * (t_wall - t_x))
@@ -2254,7 +2416,9 @@ void compute_three_point_correlator_from_closest_wall_src_prop(const Coordinate&
   }
   return;
 }
+#endif
 
+#if 0
 void compute_three_point_correlator_ama_from_closest_wall_src_prop(const Coordinate& x, const int t_min, PionGGElemField& three_point_correlator_labeled_xp, const Propagator4d& point_src_prop, const std::vector<Propagator4d>& wall_src_list, const std::vector<Propagator4d>& exact_wall_src_list, const std::vector<int>& exact_wall_t_list, const double sloppy_exact_ratio, const double pion)
 // three_point_correlator_labeled_xp(xp)[mu][nu] =
 //   Tr(S(x, wall) * ii * gamma5 * S(wall, xp) * gamma_nu * S(xp, x) * gamma_mu) / exp(-pion * (t_wall - t_x))
@@ -2371,6 +2535,7 @@ void compute_three_point_correlator_ama_from_closest_wall_src_prop(const Coordin
   }
   return;
 }
+#endif
 
 #if 0
 void compute_point_point_wall_correlator_in_one_traj(const int t_min, const std::string& wall_src_path, const std::string& gauge_transform_path, const std::string& point_src_path, const std::string& field_out_traj_path, const double pion, int type_, int accuracy_)
@@ -2450,6 +2615,7 @@ void compute_point_point_wall_correlator_in_one_traj(const int t_min, const std:
 }
 #endif
 
+#if 0
 void load_point_xg_prop(Propagator4d& point_src_prop, const TwoPointWallEnsembleInfo& ensemble_info, const int traj, const Coordinate& point_src_coor) {
   const std::string ensemble = ensemble_info.ENSEMBLE;
   const int type = ensemble_info.TYPE;
@@ -2493,7 +2659,9 @@ void load_point_xg_prop(Propagator4d& point_src_prop, const TwoPointWallEnsemble
   }
   return;
 }
+#endif
 
+#if 0
 void load_gauge_inv(GaugeTransform& gtinv, const std::string& ensemble, const int traj) {
   TIMER_VERBOSE("load_gauge_inv");
   const std::string gauge_transform_path = get_gauge_transform_path(ensemble, traj);
@@ -2503,7 +2671,9 @@ void load_gauge_inv(GaugeTransform& gtinv, const std::string& ensemble, const in
   to_from_big_endian_64(get_data(gt));
   gt_invert(gtinv, gt);
 }
+#endif
 
+#if 0
 void load_wall_sloppy_props_no_gauge(std::vector<Propagator4d>& wall_src_list, const GaugeTransform& gtinv, const std::string ensemble, const int traj) {
   TIMER_VERBOSE("load_wall_sloppy_props_no_gauge");
   const Coordinate total_site = gtinv.geo.total_site();
@@ -2517,7 +2687,9 @@ void load_wall_sloppy_props_no_gauge(std::vector<Propagator4d>& wall_src_list, c
     wall_src_prop = wall_src_prop_;
   }
 }
+#endif
 
+#if 0
 void load_wall_sloppy_props(std::vector<Propagator4d>& wall_src_list, const GaugeTransform& gtinv, const std::string ensemble, const int traj) {
   TIMER_VERBOSE("load_wall_sloppy_props");
   const Coordinate total_site = gtinv.geo.total_site();
@@ -2533,7 +2705,9 @@ void load_wall_sloppy_props(std::vector<Propagator4d>& wall_src_list, const Gaug
     wall_src_prop = wall_src_prop_gauge;
   }
 }
+#endif
 
+#if 0
 void load_wall_exact_props_no_gauge(std::vector<int>& exact_wall_t_list, std::vector<Propagator4d>& exact_wall_src_list, const GaugeTransform& gtinv, const std::string ensemble, const int traj) {
   TIMER_VERBOSE("load_wall_exact_props_no_gauge");
   const Coordinate total_site = gtinv.geo.total_site();
@@ -2557,7 +2731,9 @@ void load_wall_exact_props_no_gauge(std::vector<int>& exact_wall_t_list, std::ve
     exact_wall_src_prop = exact_wall_src_prop_;
   }
 }
+#endif
 
+#if 0
 void load_wall_exact_props(std::vector<int>& exact_wall_t_list, std::vector<Propagator4d>& exact_wall_src_list, 
                           const GaugeTransform& gtinv, const std::string ensemble, const int traj) {
   TIMER_VERBOSE("load_wall_exact_props");
@@ -2583,7 +2759,9 @@ void load_wall_exact_props(std::vector<int>& exact_wall_t_list, std::vector<Prop
     exact_wall_src_prop = exact_wall_src_prop_gauge;
   }
 }
+#endif
 
+#if 0
 void compute_point_point_wall_correlator_ama_in_one_traj(const TwoPointWallEnsembleInfo& ensemble_info, const int traj)
 {
   TIMER_VERBOSE("compute_point_point_wall_correlator_ama_in_one_traj");
@@ -2675,6 +2853,7 @@ void compute_point_point_wall_correlator_ama_in_one_traj(const TwoPointWallEnsem
   qtouch_info(field_out_path + "/checkpoint");
   return;
 }
+#endif
 
 #if 0
 void compute_point_point_wall_correlator_ama_in_one_traj(const int t_min, const std::string& wall_src_path, const std::string& exact_wall_src_path, const std::string& gauge_transform_path, const double sloppy_exact_ratio, const std::string& point_src_path, const std::string& field_out_traj_path, const double pion, int type_)
@@ -2830,6 +3009,7 @@ void compute_point_point_wall_correlator_ama_in_one_traj(const int t_min, const 
 }
 #endif
 
+#if 0
 void read_pionggelemfield_with_accuracy_and_avg(PionGGElemField& pgge_field_avg, const std::string& field_path, int type_, int accuracy_)
 {
   TIMER_VERBOSE("read_pionggelemfield_with_accuracy_and_avg");
@@ -2858,6 +3038,7 @@ void read_pionggelemfield_with_accuracy_and_avg(PionGGElemField& pgge_field_avg,
   pgge_field_avg /= double(num);
   return;
 }
+#endif
 
 #if 0
 void avg_pionggelemfield_with_accuracy_and_rm(const std::string& field_path, int type_, int accuracy_)
@@ -2984,6 +3165,7 @@ void avg_pionggelemfield_without_accuracy_and_rm(const std::string& field_path, 
 }
 #endif
 
+#if 0
 void avg_pionggelemfield_and_rm(const TwoPointWallEnsembleInfo& tpw_info, const int traj)
 {
   TIMER_VERBOSE("avg_pionggelemfield_and_rm");
@@ -3045,6 +3227,7 @@ void avg_pionggelemfield_and_rm(const TwoPointWallEnsembleInfo& tpw_info, const 
 
   return;
 }
+#endif
 
 #if 0
 void read_pionggelemfield_without_accuracy_and_avg(PionGGElemField& pgge_field_avg, const std::string& field_path, int type_)
@@ -3077,6 +3260,7 @@ void read_pionggelemfield_without_accuracy_and_avg(PionGGElemField& pgge_field_a
 }
 #endif
 
+#if 0
 void sum_sink_over_space_from_prop(std::vector<WilsonMatrix>& wm_t, const Propagator4d& prop)
 {
   TIMER_VERBOSE("sum_sink_over_space_from_prop");
@@ -3128,8 +3312,9 @@ void sum_src_over_space_from_prop(std::vector<WilsonMatrix>& wm_t, const Propaga
     glb_sum_double(wm_t[i]);
   }
 }
+#endif
 
-
+#if 0
 std::vector<Complex> compute_wall_wall_correlation_function(const std::string& wall_src_path, const int total_t)
 {
   TIMER_VERBOSE("compute_wall_wall_correlation_function");
@@ -3165,7 +3350,9 @@ std::vector<Complex> compute_wall_wall_correlation_function(const std::string& w
 
   main_displayln_info("compute wall to wall");
   std::vector<Complex> wall_wall_corr(total_t / 2);
-  set_zero(wall_wall_corr);
+  for (int i = 0; i < wall_wall_corr.size(); ++i) {
+    set_zero(wall_wall_corr[i]);
+  }
   for (int tstart = 0; tstart < total_t; ++tstart)
   {
     for (int tsep = 0; tsep < total_t / 2; ++tsep)
@@ -3190,7 +3377,9 @@ std::vector<Complex> compute_wall_wall_correlation_function(const std::string& w
 
   return wall_wall_corr;
 }
+#endif
 
+#if 0
 std::vector<Complex> compute_wall_wall_correlator_one_traj(const WallWallEnsembleInfo& ensemble_info, const int traj)
 {
   TIMER_VERBOSE("compute_wall_wall_correlator_one_traj");
@@ -3282,7 +3471,9 @@ std::vector<Complex> compute_wall_wall_correlator_one_traj(const WallWallEnsembl
   // wall to wall
   main_displayln_info(std::string(fname) + traj_label + ": Compute Wall To Wall");
   std::vector<Complex> wall_wall_corr(total_t / 2);
-  set_zero(wall_wall_corr);
+  for (int i = 0; i < wall_wall_corr.size(); ++i) {
+    set_zero(wall_wall_corr[i]);
+  }
   for (int tstart = 0; tstart < total_t; ++tstart)
   {
     for (int tsep = 0; tsep < total_t / 2; ++tsep)
@@ -3317,7 +3508,9 @@ std::vector<Complex> compute_wall_wall_correlator_one_traj(const WallWallEnsembl
 
   return wall_wall_corr;
 }
+#endif
 
+#if 0
 std::string show_vec_complex(std::vector<Complex> vec)
 {
   std::string res = "";
@@ -3327,7 +3520,9 @@ std::string show_vec_complex(std::vector<Complex> vec)
   }
   return res;
 }
+#endif
 
+#if 0
 std::vector<Complex> compute_zw_from_wall_wall_corr(const std::vector<Complex>& vec, const double pion)
 {
   std::vector<Complex> res(vec.size());
@@ -3337,7 +3532,9 @@ std::vector<Complex> compute_zw_from_wall_wall_corr(const std::vector<Complex>& 
   }
   return res;
 }
+#endif
 
+#if 0
 void compute_three_point_corr_model(PionGGElemField& three_point_correlator_labeled_xp, const int tsep, const double pion)
 {
   TIMER_VERBOSE("compute_three_point_corr_model");
@@ -3363,6 +3560,7 @@ void compute_three_point_corr_model(PionGGElemField& three_point_correlator_labe
   }
   return;
 }
+#endif
 
 #if 0
 void compute_f2_24D_sloppy_all_traj()
@@ -3838,7 +4036,7 @@ void compute_point_point_wall_correlator_ama_32D_all_traj()
 }
 #endif
 
-#if 1
+#if 0
 void compute_wall_wall_corr_24D()
 {
   // prepare traj_list
@@ -4012,6 +4210,7 @@ void test()
 }
 #endif
 
+#if 0
 void compute_point_point_wall_correlator(const std::string& ensemble, const std::string& accuracy)
 {
   TwoPointWallEnsembleInfo ensemble_info(ensemble, accuracy);
@@ -4031,7 +4230,9 @@ void compute_point_point_wall_correlator(const std::string& ensemble, const std:
     }
   }
 }
+#endif
 
+#if 0
 void compute_f2_all_traj_pairs(const std::string ensemble, const std::string accuracy, const std::string mod, const int xxp_limit)
 {
   TIMER_VERBOSE("compute_f2_all_traj_pairs");
@@ -4068,7 +4269,9 @@ void compute_f2_all_traj_pairs(const std::string ensemble, const std::string acc
     }
   }
 }
+#endif
 
+#if 0
 void compute_wall_wall_correlator_all_traj(std::string ensemble, std::string accuracy)
 {
   TIMER_VERBOSE("compute_wall_wall_correlator_all_traj");
@@ -4102,7 +4305,9 @@ void compute_wall_wall_correlator_all_traj(std::string ensemble, std::string acc
       std::vector<Complex> wall_wall_corr = compute_wall_wall_correlator_one_traj(ensemble_info, traj);
       if (wall_wall_corr_avg.size() != wall_wall_corr.size()) {
         wall_wall_corr_avg.resize(wall_wall_corr.size());
-        set_zero(wall_wall_corr_avg);
+        for (int i = 0; i < wall_wall_corr_avg.size(); ++i) {
+          set_zero(wall_wall_corr_avg[i]);
+        }
       }
       main_displayln_info(fname + ssprintf(": Wall to Wall Corr Result for Traj=%d:", traj));
       main_displayln_info(show_vec_complex(wall_wall_corr));
@@ -4123,10 +4328,111 @@ void compute_wall_wall_correlator_all_traj(std::string ensemble, std::string acc
   // main_displayln_info(std::string(fname) + ssprintf(": Wall Wall Corr Avg Result Over %d Trajs:", cnt));
   // main_displayln_info(show_vec_complex(wall_wall_corr_avg));
 }
+#endif
+
+void test_gen_coor() {
+  int m = 0;
+  int a = 2;
+  int left = 5;
+  int mid = 50;
+  int right = 100;
+  DistFunc dist_func(m, a, left, mid, right);
+  double norm = dist_func.norm;
+  main_displayln_info(ssprintf("norm %24.17E", norm));
+
+  std::string str_for_rs = "test";
+  Coordinate init_coor(11, 11, 11, 11);
+  Coordinate range(11, 11, 11, 11);
+  int sleep = 100;
+  int stats[100];
+
+  for (int i = 0; i < 100; ++i) {
+    stats[i] = 0;
+  }
+  GenCoorDist gen_coor_dist(dist_func, str_for_rs, init_coor, range, sleep);
+  for (int i = 0; i < 10000; ++i) {
+    CoordinateD curr_coor = gen_coor_dist.get_next_coor();
+    stats[int(r_coorD(curr_coor))] += 1;
+  }
+  for (int i = 0; i < 100; ++i) {
+    main_displayln_info(ssprintf("[%d], %d, %f, %f", i, stats[i], 1. * stats[i] / 10000, dist_func.compute_r_p((double) i)));
+  }
+
+  std::vector<double> theta;
+  theta = rotate_thetas_from_0001_to(Coordinate(0, 0, 0, 0));
+  main_displayln_info(show_vec_double(theta));
+  theta = rotate_thetas_from_0001_to(Coordinate(1, 0, 0, 0));
+  main_displayln_info(show_vec_double(theta));
+  theta = rotate_thetas_from_0001_to(Coordinate(-1, 0, 0, 0));
+  main_displayln_info(show_vec_double(theta));
+  theta = rotate_thetas_from_0001_to(Coordinate(0, 1, 0, 0));
+  main_displayln_info(show_vec_double(theta));
+  theta = rotate_thetas_from_0001_to(Coordinate(0, -1, 0, 0));
+  main_displayln_info(show_vec_double(theta));
+  theta = rotate_thetas_from_0001_to(Coordinate(0, 0, 1, 0));
+  main_displayln_info(show_vec_double(theta));
+  theta = rotate_thetas_from_0001_to(Coordinate(0, 0, -1, 0));
+  main_displayln_info(show_vec_double(theta));
+  theta = rotate_thetas_from_0001_to(CoordinateD(0, 0, 0, 0.0000001));
+  main_displayln_info(show_vec_double(theta));
+  theta = rotate_thetas_from_0001_to(CoordinateD(0.287, -379.281, 2392.573, -23146763129478.238478));
+  main_displayln_info(show_vec_double(theta));
+  theta = rotate_thetas_from_0001_to(CoordinateD(2.32, -3.46, 5.01, 10.5));
+  main_displayln_info(show_vec_double(theta));
+  theta = rotate_thetas_from_0001_to(CoordinateD(27.03, -47.82, -46.17, 11.26));
+  main_displayln_info(show_vec_double(theta));
+
+  sync_node();
+  return;
+}
 
 int main(int argc, char* argv[])
 {
   begin(&argc, &argv);
+
+  initialize();
+  // compute_f2_all_traj_pairs("32D-0.00107-physical-pion", "ama", "", 16);
+  // compute_f2_all_traj_pairs("48I-0.00078-physical-pion", "ama", "", 24);
+  // compute_f2_all_traj_pairs("24D-0.00107-physical-pion", "ama", "", 12);
+  // compute_f2_all_traj_pairs("32Dfine-0.0001-physical-pion", "ama", "", 16);
+  compute_f2_all_traj_pairs("24D-0.0174-physical-pion", "ama", "", 12);
+  exit(0);
+
+  compute_fr_interpolation_all_traj("48I-0.00078", "ama", 4., 80, 20, 20);
+  compute_fr_interpolation_all_traj("24D-0.00107", "ama", 4., 80, 20, 20);
+  compute_fr_interpolation_all_traj("32D-0.00107", "ama", 4., 80, 20, 20);
+  compute_fr_interpolation_all_traj("32Dfine-0.0001", "ama", 4., 80, 20, 20);
+
+  compute_fr_all_traj("48I-0.00078", "ama", 24 * 24);
+  compute_fr_all_traj("24D-0.00107", "ama", 144);
+  compute_fr_all_traj("32D-0.00107", "ama", 256);
+  compute_fr_all_traj("32Dfine-0.0001", "ama", 256);
+  exit(0);
+
+  initialize();
+  compute_f2_all_traj_pairs("24D-0.00107-refine-field", "ama", "", 12);
+  exit(0);
+
+  // test_gen_coor();
+  initialize();
+  compute_f2_all_traj_pairs("48I-0.00078-physical-pion", "ama", "", 24);
+  exit(0);
+
+  initialize();
+  compute_f2_all_traj_pairs("24D-0.0174-physical-pion", "ama", "", 12);
+  exit(0);
+  compute_f2_all_traj_pairs("24D-0.00107-physical-pion", "ama", "", 12);
+
+  compute_f2_all_traj_pairs("32Dfine-0.0001-physical-pion", "ama", "", 16);
+  exit(0);
+  compute_f2_all_traj_pairs("32Dfine-0.0001", "ama", "", 16);
+
+  compute_f2_all_traj_pairs("48I-0.00078", "ama", "", 24);
+  compute_f2_all_traj_pairs("48I-0.00078", "ama", "", 22);
+  compute_f2_all_traj_pairs("48I-0.00078", "ama", "", 20);
+  compute_f2_all_traj_pairs("48I-0.00078", "ama", "", 18);
+  compute_f2_all_traj_pairs("48I-0.00078", "ama", "", 16);
+  exit(0);
 
   initialize();
   compute_f2_all_traj_pairs("48I-0.00078", "ama", "", 24);
@@ -4153,7 +4459,6 @@ int main(int argc, char* argv[])
   exit(0);
 
   compute_wall_wall_correlator_all_traj("24D-0.0174", "ama");
-  // compute_point_point_wall_correlator("24D-0.0174", "ama");
   exit(0);
 
   initialize();
@@ -4185,234 +4490,6 @@ int main(int argc, char* argv[])
 
   compute_f2_all_traj_pairs("24D-0.00107", "ama", "", 12);
   compute_f2_all_traj_pairs("24D-0.00107", "ama", "", 10);
-
-  // compute_point_point_wall_correlator("32Dfine-0.0001", "ama");
-
-  // compute_wall_wall_correlator_all_traj_32D_sloppy();
-
-  // compute_model();
-  // compute_point_point_wall_correlator_ama_24D_all_traj();
-  // compute_f2_24D_ama_all_traj();
-  // compute_point_point_wall_correlator_sloppy_24D_all_traj();
-  // compute_f2_24D_sloppy_all_traj();
-
-  // compute_point_point_wall_correlator_sloppy_32D_all_traj();
-  // compute_point_point_wall_correlator_ama_32D_all_traj();
-  // int XXP_LIMIT = 10;
-  // int TMIN = 10;
-  // std::string MOD = "";
-  // compute_f2_32D_ama_all_traj(XXP_LIMIT, TMIN, MOD);
-  // MOD = "xyp>=xy";
-  // XXP_LIMIT = 14;
-  // compute_f2_32D_ama_all_traj(XXP_LIMIT, TMIN, MOD);
-  // MOD = "";
-  // XXP_LIMIT = 16;
-  // compute_f2_32D_ama_all_traj(XXP_LIMIT, TMIN, MOD);
-  
-  // compute_point_point_wall_correlator_sloppy_32D_all_traj();
-  // compute_f2_32D_sloppy_all_traj();
-
-#if 0 // model
-  const int TSEP = 1000;
-  double PION = 0.13975;
-  const Coordinate TOTAL_SITE = Coordinate(64, 64, 64, 64);
-  const Geometry geo(TOTAL_SITE, 1);
-  PionGGElemField three_point_correlator_labeled_xp;
-  three_point_correlator_labeled_xp.init(geo);
-  set_zero(three_point_correlator_labeled_xp.field);
-
-  compute_three_point_corr_model(three_point_correlator_labeled_xp, TSEP, PION);
-
-  double XXP_LIMIT = 21;
-  double MUON = 0.1056583745 / AINV;
-  std::string pair_info_file = "/home/tucheng/qcdlib-python/hlbl-pi0.out/";
-  // pair_info_file += "y_and_rotation_angles_distr:m=0,a=2,r_left=5,r_mid=40,r_right=60,npairs:4096";
-  pair_info_file += "y_and_rotation_angles_distr:m=0,a=2,r_left=5,r_mid=40,r_right=60,npairs:130000";
-
-  main_displayln_info(ssprintf("MUON: %f", MUON));
-  main_displayln_info(ssprintf("PION: %f", PION));
-  main_displayln_info(ssprintf("XXP_LIMIT: %f", XXP_LIMIT));
-  main_displayln_info(ssprintf("TSEP: %d", TSEP));
-  main_displayln_info(ssprintf("PION INFO FILE: ") + pair_info_file);
-
-  init_muon_line();
-  std::vector<Y_And_Rotation_Info_Elem> pairs_info_all = read_y_and_rotation_info(pair_info_file);
-  int i_pairs_start = 8000;
-  int num_pairs = 4096;
-  std::vector<Y_And_Rotation_Info_Elem> pairs_info(pairs_info_all.begin() + i_pairs_start, pairs_info_all.begin() + i_pairs_start + num_pairs - 1);
-
-  const std::string F2_FOLDER = "f2";
-  qmkdir_sync_node(F2_FOLDER);
-  qmkdir_sync_node(F2_FOLDER + "/model");
-  const std::string one_pair_save_folder = F2_FOLDER + "/model" + ssprintf("/pion=%f;t-sep=%d;xxp-limit=%d", PION, TSEP, int(XXP_LIMIT));
-  qmkdir_sync_node(one_pair_save_folder);
-  avg_f2_table_from_three_point_corr_from_y_and_rotation_info(pairs_info, three_point_correlator_labeled_xp, three_point_correlator_labeled_xp, TSEP, XXP_LIMIT, MUON, PION, one_pair_save_folder);
-#endif
-
-#if 0 // compute point-point-wall correlator all traj
-  // prepare traj_list
-  std::vector<int> traj_list = {1030};
-
-  main_displayln_info(ssprintf("Num of Configurations: %d", traj_list.size()));
-
-  const int T_SEP = 10;
-  const std::string FIELD_OUT_PATH = "ThreePointCorrField/24D";
-  const int TYPE = 0;
-  const int ACCURACY= 0;
-
-  qmkdir_sync_node("ThreePointCorrField");
-  qmkdir_sync_node(FIELD_OUT_PATH);
-
-  main_displayln_info(ssprintf("T_SEP: %d", T_SEP));
-  main_displayln_info("FIELD_OUT_PATH: " + FIELD_OUT_PATH);
-  main_displayln_info(ssprintf("TYPE: %d", TYPE));
-  main_displayln_info(ssprintf("ACCURACY: %d", ACCURACY));
-
-  for (int i = 0; i < traj_list.size(); ++i)
-  {
-    main_displayln_info(ssprintf("Compute Point Point to Wall Corr [traj=%d]", traj_list[i]));
-    const std::string WALL_SRC_PATH = ssprintf("/home/ljin/application/Public/Qlat-CPS-cc/jobs/24D/wall-src/results/results=%d/huge-data/wall_src_propagator", traj_list[i]);
-    const std::string GAUGE_TRANSFORM_PATH = ssprintf("/home/ljin/application/Public/Qlat-CPS-cc/jobs/24D/wall-src/results/results=%d/huge-data/gauge-transform", traj_list[i]);
-    const std::string POINT_SRC_PATH = ssprintf("/home/ljin/application/Public/Muon-GM2-cc/jobs/24D/discon-1/results/prop-hvp ; results=%d/huge-data/prop-point-src", traj_list[i]);
-
-    main_displayln_info("WALL_SRC_PATH: " + WALL_SRC_PATH);
-    main_displayln_info("GAUGE_TRANSFORM_PATH: " + GAUGE_TRANSFORM_PATH);
-    main_displayln_info("POINT_SRC_PATH: " + POINT_SRC_PATH);
-
-    // pair_wall_src_prop_and_point_src_prop(T_SEP, WALL_SRC_PATH, GAUGE_TRANSFORM_PATH, POINT_SRC_PATH, FIELD_OUT_PATH, TYPE, ACCURACY);
-    compute_point_point_wall_correlator_in_one_traj(T_SEP, WALL_SRC_PATH, GAUGE_TRANSFORM_PATH, POINT_SRC_PATH, FIELD_OUT_PATH, TYPE, ACCURACY);
-  }
-#endif
-
-#if 0 // compute point-point-wall correlator all traj 32D
-  // prepare traj_list
-  std::vector<int> traj_list = {1050};
-
-  main_displayln_info(ssprintf("Num of Configurations: %d", traj_list.size()));
-
-  const int T_SEP = 20;
-  const std::string FIELD_OUT_PATH = "PionGGElemField/32D-0.00107";
-  const int TYPE = 0;
-  const int ACCURACY= 0;
-
-  qmkdir_sync_node("PionGGElemField");
-  qmkdir_sync_node(FIELD_OUT_PATH);
-
-  main_displayln_info(ssprintf("T_SEP: %d", T_SEP));
-  main_displayln_info("FIELD_OUT_PATH: " + FIELD_OUT_PATH);
-  main_displayln_info(ssprintf("TYPE: %d", TYPE));
-  main_displayln_info(ssprintf("ACCURACY: %d", ACCURACY));
-
-  for (int i = 0; i < traj_list.size(); ++i)
-  {
-    main_displayln_info(ssprintf("Compute Point Point to Wall Corr [traj=%d]", traj_list[i]));
-    const std::string WALL_SRC_PATH = ssprintf("/home/ljin/application/Public/Qlat-CPS-cc/jobs/32D/wall-src/results/32D-0.00107/results=%d/huge-data/wall_src_propagator", traj_list[i]);
-    const std::string GAUGE_TRANSFORM_PATH = ssprintf("/home/ljin/application/Public/Qlat-CPS-cc/jobs/32D/wall-src/results/32D-0.00107/results=%d/huge-data/gauge-transform", traj_list[i]);
-    const std::string POINT_SRC_PATH = ssprintf("/home/ljin/application/Public/Muon-GM2-cc/jobs/32D/discon-1/results/prop-hvp ; results=%d/huge-data/prop-point-src", traj_list[i]);
-
-    main_displayln_info("WALL_SRC_PATH: " + WALL_SRC_PATH);
-    main_displayln_info("GAUGE_TRANSFORM_PATH: " + GAUGE_TRANSFORM_PATH);
-    main_displayln_info("POINT_SRC_PATH: " + POINT_SRC_PATH);
-
-    pair_wall_src_prop_and_point_src_prop(T_SEP, WALL_SRC_PATH, GAUGE_TRANSFORM_PATH, POINT_SRC_PATH, FIELD_OUT_PATH, TYPE, ACCURACY);
-  }
-#endif
-
-#if 0 // compute wall-wall correlator all traj 32D
-  // prepare traj_list
-  std::vector<int> traj_list = {1050, 1060, 1070, 1080, 1090};
-  main_displayln_info(ssprintf("Num of Configurations: %d", traj_list.size()));
-
-  const int TOTAL_T = 64;
-  main_displayln_info(ssprintf("TOTAL_T: %d", TOTAL_T));
-
-  std::vector<Complex> wall_wall_corr_avg(TOTAL_T / 2);
-  set_zero(wall_wall_corr_avg);
-  main_displayln_info("Compute Wall to Wall Corr for All Configurations Start");
-  for (int i = 0; i < traj_list.size(); ++i)
-  {
-    main_displayln_info(ssprintf("Compute Wall to Wall Corr [traj=%d]", traj_list[i]));
-    const std::string WALL_SRC_PATH = ssprintf("/home/ljin/application/Public/Qlat-CPS-cc/jobs/32D/wall-src/results/32D-0.00107/results=%d/huge-data/wall_src_propagator", traj_list[i]);
-    main_displayln_info("WALL_SRC_PATH: " + WALL_SRC_PATH);
-
-    std::vector<Complex> wall_wall_corr;
-    wall_wall_corr = compute_wall_wall_correlation_function(WALL_SRC_PATH, TOTAL_T);
-    main_displayln_info(ssprintf("wall_wall_corr[traj=%d] result:", traj_list[i]));
-    main_displayln_info(show_vec_complex(wall_wall_corr));
-
-    wall_wall_corr_avg = wall_wall_corr_avg + wall_wall_corr;
-  }
-  main_displayln_info("Compute Wall to Wall Corr for All Configurations End");
-  wall_wall_corr_avg = wall_wall_corr_avg / traj_list.size();
-  main_displayln_info("wall_wall_corr_avg result:");
-  main_displayln_info(show_vec_complex(wall_wall_corr_avg));
-
-#endif
-
-#if 0
-  init_muon_line();
-  double MUON = 0.1056583745 / AINV;
-  double PION = 0.13975;
-  double XXP_LIMIT = 15;
-  const Coordinate TOTAL_SITE = Coordinate(64, 64, 64, 64);
-  std::string f_two_configs = "/home/tucheng/qcdlib/hlbl-pi0.out/";
-  f_two_configs += "distr:m=0,a=2,r_left=5,r_mid=40,r_right=60,npairs:1024,r_pion_to_gamma:30";
-  //f_two_configs += "distr:m=0,a=2,r_left=5,r_mid=40,r_right=60,npairs=1024";
-  //f_two_configs += "distr:m=0,a=2,r_left=5,r_mid=40,r_right=60,npairs:512,r_pion_to_gamma:30";
-
-  main_displayln_info(ssprintf("MUON: %f", MUON));
-  main_displayln_info(ssprintf("PION: %f", PION));
-  main_displayln_info(ssprintf("XXP_LIMIT: %f", XXP_LIMIT));
-  main_displayln_info(ssprintf("TOTAL_SITE in small area:"));
-  main_displayln_info(show_coordinate(TOTAL_SITE));
-  main_displayln_info(ssprintf("Compute Config: ") + f_two_configs);
-
-  avg_f2_model_table(f_two_configs, XXP_LIMIT, MUON, PION, TOTAL_SITE);
-#endif
-
-#if 0
-  init_muon_line();
-  double MUON = 0.1056583745 / AINV;
-  double PION = 0.13975;
-  double XXP_LIMIT = 10;
-  const Coordinate TOTAL_SITE = Coordinate(24, 24, 24, 64);
-  std::string f_two_configs = "/home/tucheng/qcdlib/hlbl-pi0.out/";
-  f_two_configs += "24D_config=2280_config=2240_distr:m=0,a=2,r_left=5,r_mid=40,r_right=60,npairs:512,r_pion_to_gamma:20";
-
-  main_displayln_info(ssprintf("MUON: %f", MUON));
-  main_displayln_info(ssprintf("PION: %f", PION));
-  main_displayln_info(ssprintf("XXP_LIMIT: %f", XXP_LIMIT));
-  main_displayln_info(ssprintf("TOTAL_SITE in small area:"));
-  main_displayln_info(show_coordinate(TOTAL_SITE));
-  main_displayln_info(ssprintf("Compute Config: ") + f_two_configs);
-
-  avg_f2_model_table(f_two_configs, XXP_LIMIT, MUON, PION, TOTAL_SITE);
-  sum_f2_nofac_xb_lat_bm_model_table(f_two_configs, XXP_LIMIT, MUON, PION);
-  sum_f2_nofac_xb_model_bm_lat_table(f_two_configs, XXP_LIMIT, MUON, PION);
-  sum_f2_nofac_table(f_two_configs, XXP_LIMIT, MUON, PION);
-#endif
-
-#if 0
-  init_muon_line();
-  double MUON = 0.1056583745 / AINV;
-  double PION = 0.13975;
-  const int TSEP = 30;
-  double XXP_LIMIT = 15;
-  const Coordinate TOTAL_SITE = Coordinate(64, 64, 64, 64);
-
-  std::string f_two_configs = "/home/tucheng/qcdlib/hlbl-pi0.out/";
-  f_two_configs += "y_and_rotation_angles_distr:m=0,a=2,r_left=5,r_mid=40,r_right=60,npairs:512";
-
-  main_displayln_info(ssprintf("MUON: %f", MUON));
-  main_displayln_info(ssprintf("PION: %f", PION));
-  main_displayln_info(ssprintf("XXP_LIMIT: %f", XXP_LIMIT));
-  main_displayln_info(ssprintf("TOTAL_SITE in small area:"));
-  main_displayln_info(show_coordinate(TOTAL_SITE));
-  main_displayln_info(ssprintf("Compute Config: ") + f_two_configs);
-
-  //avg_f2_rotation_model_table(f_two_configs, TSEP, XXP_LIMIT, MUON, PION, TOTAL_SITE);
-  avg_f2_model_table_from_y_and_rotation_info(f_two_configs, TSEP, XXP_LIMIT, MUON, PION, TOTAL_SITE);
-#endif
 
   return 0;
 }
