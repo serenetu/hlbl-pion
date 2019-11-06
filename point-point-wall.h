@@ -50,6 +50,27 @@ void three_prop_contraction_(PionGGElem& pgge, const WilsonMatrix& wm_21, const 
   }
 }
 
+void load_luchang_field(PionGGElemField& field, const std::string& path)
+{
+  FieldM<Complex, 16> flc;
+  read_field(flc, path);
+  to_from_big_endian_64(get_data(flc));
+  const Geometry& geo = flc.geo;
+  field.init(geo, 1);
+  qassert(is_matching_geo(geo, field.geo));
+#pragma omp parallel for
+  for (long index = 0; index < geo.local_volume(); ++index) {
+    Coordinate x = geo.coordinate_from_index(index);
+
+    for (int mu = 0; mu < 4; ++mu) {
+      for (int nu = 0; nu < 4; ++nu) {
+        field.get_elem(x).v[mu][nu] = flc.get_elem(x, 4 * mu + nu);
+      }
+    }
+  }
+  return;
+}
+
 struct TwoPointWallEnsembleInfo : public EnsembleInfo{
   std::string ACCURACY;
   int T_MIN;
@@ -177,6 +198,9 @@ struct TwoPointWallEnsembleInfo : public EnsembleInfo{
 
   void load_field_traj_avg(PionGGElemField& field, const int traj) const {
     const std::string path = get_field_traj_avg_dir(traj);
+    load_luchang_field(field, path);
+    return;
+#if 0
     FieldM<Complex, 16> flc;
     read_field(flc, path);
     to_from_big_endian_64(get_data(flc));
@@ -194,6 +218,7 @@ struct TwoPointWallEnsembleInfo : public EnsembleInfo{
       }
     }
     return;
+#endif
 #if 0
     const std::string path = get_field_traj_avg_dir(traj);
     if (ENSEMBLE == "32Dfine-0.0001" || ENSEMBLE == "24D-0.0174" || ENSEMBLE == "48I-0.00078") {

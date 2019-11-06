@@ -4390,12 +4390,39 @@ int main(int argc, char* argv[])
 {
   begin(&argc, &argv);
 
+  init_muon_line();
+  compute_f2_model("physical-24nt96-1.0", "", 12);
+  compute_f2_model("physical-32nt128-1.0", "", 16);
+  compute_f2_model("physical-32nt128-1.3333", "", 16);
+  compute_f2_model("physical-48nt192-1.0", "", 24);
+  compute_f2_model("physical-48nt192-2.0", "", 24);
+
+  compute_f2_model("heavy-24nt96-1.0", "", 12);
+  compute_f2_model("heavy-32nt128-1.0", "", 16);
+  compute_f2_model("heavy-32nt128-1.3333", "", 16);
+  compute_f2_model("heavy-48nt192-1.0", "", 24);
+  compute_f2_model("heavy-48nt192-2.0", "", 24);
+  exit(0);
+
   initialize();
+  compute_model_fr_interpolation("physical-24nt96-1.0", 4., 200, 100, 100);
+  compute_model_fr_interpolation("physical-32nt128-1.0", 4., 200, 100, 100);
+  compute_model_fr_interpolation("physical-32nt128-1.3333", 4., 200, 100, 100);
+  compute_model_fr_interpolation("physical-48nt192-1.0", 4., 200, 100, 100);
+  compute_model_fr_interpolation("physical-48nt192-2.0", 4., 200, 100, 100);
+
+  compute_model_fr_interpolation("heavy-24nt96-1.0", 4., 200, 100, 100);
+  compute_model_fr_interpolation("heavy-32nt128-1.0", 4., 200, 100, 100);
+  compute_model_fr_interpolation("heavy-32nt128-1.3333", 4., 200, 100, 100);
+  compute_model_fr_interpolation("heavy-48nt192-1.0", 4., 200, 100, 100);
+  compute_model_fr_interpolation("heavy-48nt192-2.0", 4., 200, 100, 100);
+  exit(0);
+
   // compute_f2_all_traj_pairs("32D-0.00107-physical-pion", "ama", "", 16);
   // compute_f2_all_traj_pairs("48I-0.00078-physical-pion", "ama", "", 24);
   // compute_f2_all_traj_pairs("24D-0.00107-physical-pion", "ama", "", 12);
   // compute_f2_all_traj_pairs("32Dfine-0.0001-physical-pion", "ama", "", 16);
-  compute_f2_all_traj_pairs("24D-0.0174-physical-pion", "ama", "", 12);
+  // compute_f2_all_traj_pairs("24D-0.0174-physical-pion", "ama", "", 12);
   exit(0);
 
   compute_fr_interpolation_all_traj("48I-0.00078", "ama", 4., 80, 20, 20);

@@ -254,19 +254,47 @@ struct YAndRotationInfo
     return;
   }
 
-  YAndRotationInfo(const std::string& ensemble_) {
+  YAndRotationInfo(const std::string& ensemble_, int chunk_size_=1024, int step_=1024) {
     const std::string ENSEMBLE = ensemble_;
+    chunk_size = chunk_size_;
+    step = step_;
     qassert(step >= chunk_size);
 
-    if (ENSEMBLE == "24D-0.00107" || ENSEMBLE == "24D-0.00107-physical-pion" || ENSEMBLE == "24D-0.00107-refine-field") {
+    if (
+        ENSEMBLE == "24D-0.00107" || 
+        ENSEMBLE == "24D-0.00107-physical-pion" || 
+        ENSEMBLE == "24D-0.00107-refine-field" ||
+        ENSEMBLE == "24D-0.0174" || 
+        ENSEMBLE == "24D-0.0174-physical-pion" || 
+        ENSEMBLE == "24D-0.0174-refine-field" ||
+        ENSEMBLE == "physical-24nt96-1.0" ||
+        ENSEMBLE == "heavy-24nt96-1.0" ||
+        ENSEMBLE == "32D-0.00107" || 
+        ENSEMBLE == "32D-0.00107-physical-pion" || 
+        ENSEMBLE == "32D-0.00107-refine-field" ||
+        ENSEMBLE == "physical-32nt128-1.0" ||
+        ENSEMBLE == "heavy-32nt128-1.0" ||
+        ENSEMBLE == "physical-48nt192-1.0" ||
+        ENSEMBLE == "heavy-48nt192-1.0")
+    {
       m = 0; a = 2; left = 5; mid = 40; right = 60;
-    } else if (ENSEMBLE == "24D-0.0174" || ENSEMBLE == "24D-0.0174-physical-pion" || ENSEMBLE == "24D-0.0174-refine-field") {
-      m = 0; a = 2; left = 5; mid = 40; right = 60;
-    } else if (ENSEMBLE == "32D-0.00107" || ENSEMBLE == "32D-0.00107-physical-pion" || ENSEMBLE == "32D-0.00107-refine-field") {
-      m = 0; a = 2; left = 5; mid = 40; right = 60;
-    } else if (ENSEMBLE == "32Dfine-0.0001" || ENSEMBLE == "32Dfine-0.0001-physical-pion" || ENSEMBLE == "32Dfine-0.0001-refine-field") {
+    } else if (
+        ENSEMBLE == "32Dfine-0.0001" || 
+        ENSEMBLE == "32Dfine-0.0001-physical-pion" || 
+        ENSEMBLE == "32Dfine-0.0001-refine-field" ||
+        ENSEMBLE == "physical-32nt128-1.3333" ||
+        ENSEMBLE == "heavy-32nt128-1.3333"
+        ) 
+    {
       m = 0; a = 2; left = 5; mid = 55; right = 85;
-    } else if (ENSEMBLE == "48I-0.00078" || ENSEMBLE == "48I-0.00078-physical-pion" || ENSEMBLE == "48I-0.00078-refine-field") {
+    } else if (
+        ENSEMBLE == "48I-0.00078" || 
+        ENSEMBLE == "48I-0.00078-physical-pion" || 
+        ENSEMBLE == "48I-0.00078-refine-field" ||
+        ENSEMBLE == "physical-48nt192-2.0" ||
+        ENSEMBLE == "heavy-48nt192-2.0"
+        ) 
+    {
       m = 0; a = 2; left = 5; mid = 70; right = 110;
     } else {
       qassert(false);
@@ -810,6 +838,107 @@ void compute_f2_all_traj_pairs(const std::string ensemble, const std::string acc
       compute_f2_one_traj_pair_and_save(traj_pair, f2_ensemble_info, y_info, two_point_wall_1, two_point_wall_2);
       release_lock();
     }
+  }
+}
+
+void compute_f2_model(const std::string ensemble, const std::string mod, const int xxp_limit)
+{
+  // use physical pion mass in pion prop
+  TIMER_VERBOSE("compute_f2_model");
+
+  const double muon = get_physical_muon_gev() / get_ainv(ensemble);
+  const double pion_for_prop = get_physical_pion_gev() / get_ainv(ensemble);
+  main_displayln_info(ssprintf("muon mass: %.20f (lattice unit)", muon));
+  main_displayln_info(ssprintf("pion mass for pion prop: %.20f (lattice unit)", pion_for_prop));
+
+  YAndRotationInfo y_and_rotation_info(ensemble, 4096, 4096);
+  std::vector<Y_And_Rotation_Info_Elem> y_info = y_and_rotation_info.get_next_y_info_list();
+
+  std::string f2_model_ensemble_path = "f2/" + ensemble;
+  qmkdir_sync_node(f2_model_ensemble_path);
+  const int num_rmax = 120;
+  const int num_rmin = 60;
+  main_displayln_info("f2_model_ensemble_path: " + f2_model_ensemble_path);
+  main_displayln_info(ssprintf("num_rmax %d, num_rmin %d", num_rmax, num_rmin));
+
+  if (obtain_lock(f2_model_ensemble_path + "-lock")) {
+    // load field
+    PionGGElemField two_point_wall;
+    const std::string path = "/home/ljin/application/Public/Muon-GM2-cc/jobs/pi-model-pion-gg/results/" + ensemble + "/decay.field";
+    load_luchang_field(two_point_wall, path);
+
+#if 0
+    FieldM<Complex, 16> flc;
+    read_field(flc, "/home/ljin/application/Public/Muon-GM2-cc/jobs/pi-model-pion-gg/results/" + ensemble + "/decay.field");
+    to_from_big_endian_64(get_data(flc));
+    const Geometry& geo = flc.geo;
+    two_point_wall.init(geo, 1);
+    qassert(is_matching_geo(geo, two_point_wall.geo));
+#pragma omp parallel for
+    for (long index = 0; index < geo.local_volume(); ++index) {
+      Coordinate x = geo.coordinate_from_index(index);
+      for (int mu = 0; mu < 4; ++mu) {
+        for (int nu = 0; nu < 4; ++nu) {
+          two_point_wall.get_elem(x).v[mu][nu] = flc.get_elem(x, 4 * mu + nu);
+        }
+      }
+    }
+#endif
+
+    for (int i = 0; i < y_info.size(); ++i)
+    {
+      const Y_And_Rotation_Info_Elem& one_y = y_info[i];
+      main_displayln_info(show_y_and_rotation_info_elem(one_y));
+
+      // compute
+      main_displayln_info(fname + ssprintf(": Compute One Y %d/%d", i, y_info.size()));
+      std::string file_path = f2_model_ensemble_path + ssprintf("/%05d", i);
+
+      // check
+      if (does_file_exist_sync_node(file_path)) {
+        main_displayln_info(fname + std::string(": ") + ensemble + ssprintf(": One Y %d/%d Have Been Computed", i, y_info.size()));
+        continue;
+      }
+
+      const double theta_xy = one_y.theta_xy;
+      const double theta_xt = one_y.theta_xt;
+      const double theta_zt = one_y.theta_zt;
+      const RotationMatrix rotation_matrix = RotationMatrix(theta_xy, theta_xt, theta_zt);
+      const CoordinateD& y_large = one_y.y_large;
+
+      // xb
+      XB xb;
+      set_zero(xb);
+      int xb_limit = xxp_limit;
+      find_xb_rotation_pgge(xb, two_point_wall, rotation_matrix, xb_limit);
+
+      // bm_table
+      BM_TABLE bm_table(num_rmax, num_rmin);
+      bm_table.set_zero();
+      find_bm_table_rotation_pgge(bm_table, two_point_wall, y_large, rotation_matrix, muon, mod);
+
+      // e_xbbm_table
+      Complex_Table e_xbbm_table(num_rmax, num_rmin);
+      e_xbbm_table.set_zero();
+      find_e_xbbm_table(e_xbbm_table, xb, bm_table);
+
+      // prop
+      Complex prop = pion_prop(y_large, Coor_0, pion_for_prop);
+
+      e_xbbm_table = (prop / one_y.dist) * e_xbbm_table;
+
+      // show one pair e_xbbm_table
+      std::string info = "";
+      info += ssprintf("prop: %24.17E %24.17E\n", prop.real(), prop.imag());
+      info += "show one pair e_xbbm_table with prop and dist:\n";
+      info += show_complex_table(e_xbbm_table);
+      main_displayln_info(info);
+
+      // save
+      e_xbbm_table.write_to_disk(file_path);
+
+    }
+    release_lock();
   }
 }
 

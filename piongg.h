@@ -21,12 +21,22 @@ struct FREnsembleInfo : public EnsembleInfo {
   void init(const std::string& ensemble_, const std::string& accuracy_, const bool is_interpolation_) {
     ACCURACY = accuracy_;
 		IS_INTERPOLATION = is_interpolation_;
-    qassert(ACCURACY == "ama" || ACCURACY == "sloppy");
+    qassert(ACCURACY == "ama" || ACCURACY == "sloppy" || ACCURACY == "model");
     qassert(
         ENSEMBLE == "24D-0.00107" ||
         ENSEMBLE == "32D-0.00107" ||
         ENSEMBLE == "32Dfine-0.0001" ||
-        ENSEMBLE == "48I-0.00078"
+        ENSEMBLE == "48I-0.00078" ||
+        ENSEMBLE == "physical-24nt96-1.0" ||
+        ENSEMBLE == "physical-32nt128-1.0" ||
+        ENSEMBLE == "physical-48nt192-1.0" ||
+        ENSEMBLE == "heavy-24nt96-1.0" ||
+        ENSEMBLE == "heavy-32nt128-1.0" ||
+        ENSEMBLE == "heavy-48nt192-1.0" ||
+        ENSEMBLE == "physical-32nt128-1.3333" ||
+        ENSEMBLE == "heavy-32nt128-1.3333" ||
+        ENSEMBLE == "physical-48nt192-2.0" ||
+        ENSEMBLE == "heavy-48nt192-2.0"
         )
 		if (IS_INTERPOLATION) {
       FR_ENSEMBLE_ACCURACY_OUT_PATH = FR_OUT_PATH + "/" + ENSEMBLE + "-interpolation" + "/" + ACCURACY;
@@ -83,8 +93,23 @@ Complex compute_factor(const std::string& ensemble) {
 
   double q_u = 2. / 3.;
   double q_d = -1. / 3.;
-  Complex res = -1. / sqrt(zw * zp) * std::pow(zv, 2.) * (std::pow(q_u, 2.) - std::pow(q_d, 2.));
-  res *= -3. * std::pow(PI, 2.) / f_pi / (Complex(0., 1.) * m_pi);  // first '-' coming from i * i
+  double q = (std::pow(q_u, 2.) - std::pow(q_d, 2.)) / sqrt(2.);
+  if (
+      ensemble == "physical-24nt96-1.0" ||
+      ensemble == "physical-32nt128-1.0" ||
+      ensemble == "physical-48nt192-1.0" ||
+      ensemble == "heavy-24nt96-1.0" ||
+      ensemble == "heavy-32nt128-1.0" ||
+      ensemble == "heavy-48nt192-1.0" ||
+      ensemble == "physical-32nt128-1.3333" ||
+      ensemble == "heavy-32nt128-1.3333" ||
+      ensemble == "physical-48nt192-2.0" ||
+      ensemble == "heavy-48nt192-2.0"
+     ) {
+    q = -1.; // need to make sure // the convention of three point between model and lattice diff by -1?
+  }
+  Complex res = -1. / sqrt(zw * zp) * std::pow(zv, 2.) * q;
+  res *= -3. * std::pow(PI, 2.) / (f_pi / sqrt(2.)) / (Complex(0., 1.) * m_pi);  // first '-' coming from i * i
   return res;
 }
 
@@ -214,6 +239,7 @@ std::vector<Complex> compute_fr_interpolation_one_traj(
     int num_cos_theta = 20,
     int num_phi = 20)
 {
+  // fr_list[i_r] = fr(r)
   TIMER_VERBOSE("compute_fr_interpolation_one_traj");
 	qassert(0 == get_rank());
 
@@ -269,8 +295,9 @@ std::vector<Complex> compute_fr_interpolation_one_traj(
 std::vector<Complex> compute_fr_one_traj(
     const FREnsembleInfo& fr_info, 
     PionGGElemField& two_point_wall, 
-    const int r_max = 100)
+    const int r_max = 1000)
 {
+  // fr(r^2)
   TIMER_VERBOSE("compute_fr_one_traj");
   std::vector<Complex> fr(r_max, Complex(0., 0.));
   std::vector<long> fr_cnt(r_max, 0);
@@ -366,7 +393,7 @@ std::vector<Complex> compute_fr_all_traj(const std::string& ensemble, const std:
   }
 }
 
-std::vector<Complex> compute_fr_interpolation_all_traj(
+void compute_fr_interpolation_all_traj(
     const std::string& ensemble, 
     const std::string accuracy, 
     double r_max = 4.,
@@ -374,7 +401,7 @@ std::vector<Complex> compute_fr_interpolation_all_traj(
     int num_cos_theta = 20,
     int num_phi = 20)
 {
-  TIMER_VERBOSE("compute_fr_field_all_traj");
+  TIMER_VERBOSE("compute_fr_interpolation_all_traj");
   const TwoPointWallEnsembleInfo tpw_info(ensemble, accuracy);
   const FREnsembleInfo fr_info(ensemble, accuracy, true);
   fr_info.make_fr_ensemble_accuracy_dir();
@@ -398,6 +425,52 @@ std::vector<Complex> compute_fr_interpolation_all_traj(
 
       release_lock();
     }
+  }
+}
+
+void compute_model_fr_interpolation(
+    const std::string& ensemble, 
+    double r_max = 4.,
+    int num_r = 40,
+    int num_cos_theta = 20,
+    int num_phi = 20)
+{
+  TIMER_VERBOSE("compute_model_fr_interpolation");
+  const FREnsembleInfo fr_info(ensemble, "model", true);
+  fr_info.make_fr_ensemble_accuracy_dir();
+
+  if (obtain_lock(fr_info.FR_ENSEMBLE_ACCURACY_OUT_PATH + "-lock")) {
+    PionGGElemField two_point_wall;
+    const std::string path = "/home/ljin/application/Public/Muon-GM2-cc/jobs/pi-model-pion-gg/results/" + ensemble + "/decay.field";
+    load_luchang_field(two_point_wall, path);
+
+#if 0
+    FieldM<Complex, 16> flc;
+    read_field(flc, "/home/ljin/application/Public/Muon-GM2-cc/jobs/pi-model-pion-gg/results/" + ensemble + "/decay.field");
+    to_from_big_endian_64(get_data(flc));
+    const Geometry& geo = flc.geo;
+    two_point_wall.init(geo, 1);
+    qassert(is_matching_geo(geo, two_point_wall.geo));
+#pragma omp parallel for
+    for (long index = 0; index < geo.local_volume(); ++index) {
+      Coordinate x = geo.coordinate_from_index(index);
+      for (int mu = 0; mu < 4; ++mu) {
+        for (int nu = 0; nu < 4; ++nu) {
+          two_point_wall.get_elem(x).v[mu][nu] = flc.get_elem(x, 4 * mu + nu);
+        }
+      }
+    }
+#endif
+
+    std::vector<Complex> fr_interpolation_one_traj = compute_fr_interpolation_one_traj(two_point_wall, fr_info, r_max, num_r, num_cos_theta, num_phi);
+
+    main_displayln_info(ssprintf("fr model interpolation"));
+    main_displayln_info(show_vec_complex(fr_interpolation_one_traj));
+
+    // save
+    write_data_from_0_node(&fr_interpolation_one_traj[0], fr_interpolation_one_traj.size(), fr_info.FR_ENSEMBLE_ACCURACY_OUT_PATH + "/model");
+
+    release_lock();
   }
 }
 
